@@ -9,11 +9,19 @@
 const isLogToConsole = true;
 
 /**
- * 打印信息到控制台
- * @param obj 要打印的信息
+ * fetch url base
  */
-export function log(obj) {
+export const urlBase = "http://localhost:9090/assets/v1"
+
+/**
+ * 打印信息到控制台
+ */
+export function log() {
     if(isLogToConsole) {
-        console.log(obj);
+        let str = '';
+        for(let i=0;i<arguments.length;i++){
+            str += arguments[i];
+        }
+        console.log(str);
     }
 }

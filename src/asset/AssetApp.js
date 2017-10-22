@@ -39,7 +39,7 @@ class AssetApp extends Component {
 
                 break;
             default:
-                log("不支持的菜单点击事件！");
+                //log("不支持的菜单点击事件！");
                 break;
         }
         return (
@@ -51,7 +51,7 @@ class AssetApp extends Component {
 
                         </Col>
                         <Col span={2} offset={18}>
-                            <LoginOut name={this.state.name}/>
+                            { !(page === 'login') && <LoginOut name={this.state.name}/>}
                         </Col>
                     </Row>
                 </Header>
