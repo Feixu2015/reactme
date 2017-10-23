@@ -3,40 +3,73 @@
  */
 import React, {Component} from "react";
 import {Layout, Menu, Breadcrumb, Icon, Row, Col} from 'antd';
+import './AssetApp.css';
 import logo from './logo.png';
 import asset from './asset.svg';
-import './AssetApp.css';
 import {log} from './Config';
 import Login, {LoginOut} from './Login';
+import AssetList from './AssetList';
+import EmployeeList from './EmployeeList';
 
 const {SubMenu} = Menu;
 const {Header, Footer, Content, Sider} = Layout;
 
+/**
+ * 资产管理系统主页面组件
+ */
 class AssetApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
             page: 'login',
-            name: '张三'
+            userName: '张三'
         }
-        this.handleLeftMenuClick = this.handleLeftMenuClick.bind(this);
     }
 
-    handleLeftMenuClick(e) {
+    /**
+     * 处理菜单项点击事件
+     * @param {Object} e [事件入参]
+     * e.item       为触发的菜单项
+     * e.key        为菜单项的key
+     * e.keyPath    为菜单项的key路径
+     */
+    handleLeftMenuClick = (e)=>{
         this.setState({
             page: e.key
         });
-        log("item:" + e.item + ",key:" + e.key + ",e:" + e.keyPath);
-    }
+        log(e.type, "item:" + e.item + ",key:" + e.key + ",e:" + e.keyPath);
+    };
+
+    /**
+     * 处理登录成功的回调
+     * @param userName 当前登录的用户名
+     */
+    handleLoginCallback = (userName)=>{
+        this.setState({
+            page:'asset',
+            userName: userName
+        })
+    };
+
+    /**
+     * 处理登出的回调
+     */
+    handleLoginOutCallback = ()=>{
+        this.setState({
+            page:'login',
+            userName: ''
+        })
+    };
 
     render() {
         const page = this.state.page;
+        let content = null;
         switch (page) {
             case "asset":
-
+                content = (<AssetList/>);
                 break;
             case "employee":
-
+                content = (<EmployeeList/>);
                 break;
             default:
                 //log("不支持的菜单点击事件！");
@@ -50,14 +83,14 @@ class AssetApp extends Component {
                             <img className="logo" src={logo} alt="logo" width={100}/>
 
                         </Col>
-                        <Col span={2} offset={18}>
-                            { !(page === 'login') && <LoginOut name={this.state.name}/>}
+                        <Col span={4} offset={16} className="align-right">
+                            { !(page === 'login') && <LoginOut onLoginOut={this.handleLoginOutCallback} name={this.state.userName}/>}
                         </Col>
                     </Row>
                 </Header>
                 {page === 'login' ? (
                     /* 登录页 */
-                        <Login />
+                        <Login onLoginCallback={this.handleLoginCallback}/>
                 ):(
                     <Layout>
                         <Sider width={200} style={{background: '#fff'}}>
@@ -83,15 +116,13 @@ class AssetApp extends Component {
                              <Breadcrumb.Item>App</Breadcrumb.Item>
                              </Breadcrumb>*/}
                             <Content style={{background: '#fff', padding: 24, margin: 0, minHeight: 280}}>
-                                {page}
+                                {content}
                             </Content>
                         </Layout>
                     </Layout>
                 )}
-                <Footer>
-                    <Row>
-                        <Col span={4} offset={10}>IDCOS AMS @ 2017. All right reserved.</Col>
-                    </Row>
+                <Footer className="centered-footer">
+                    IDCOS AMS @ 2017. All right reserved.
                 </Footer>
             </Layout>
         );

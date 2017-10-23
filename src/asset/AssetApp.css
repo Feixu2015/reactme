@@ -36,3 +36,12 @@
     position: relative;
     margin: auto 0;
 }
+
+.centered-footer{
+    text-align: center;
+    margin:auto auto;
+}
+
+.align-right{
+    text-align: right;
+}
