@@ -8,11 +8,12 @@ import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
 import {utils, success, fail} from './Utils';
+import moment from 'moment';
 
 /**
- * 添加员工组件
+ * 编辑员工组件
  */
-class EmployeeAdd extends Component {
+class EmployeeEdit extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -21,7 +22,8 @@ class EmployeeAdd extends Component {
                 message: null
             },
             officeAddresses: [],
-            positions: []
+            positions: [],
+            employee: {}
         };
     }
 
@@ -127,6 +129,58 @@ class EmployeeAdd extends Component {
             this.setState({
                 positions: positions
             });
+            utils.showNotification(this.state.operationResult);
+        }).catch((ex) => {
+            log("failed:", ex);
+            this.setState({
+                operationResult: {
+                    status: fail,
+                    message: ex.message
+                }
+            });
+            utils.showNotification(this.state.operationResult);
+        });
+
+        // get employee
+        fetch(urlBase + `/employee/findByCode/${this.props.param.employeeCode}`, {
+            method: 'get',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then((response) => {
+            log("response:", response);
+            return response.json()
+        }).then((json) => {
+            log("json:", json);
+            if ("success" === json.status) {
+                log("success:", json.message);
+                this.setState({
+                    operationResult: {
+                        status: null,
+                        message: null
+                    }
+                });
+                this.setState({
+                    employee: json.item
+                });
+            } else if (fail === json.status) {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: json.message
+                    }
+                });
+            } else {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: `${json.status} ${json.message}`
+                    }
+                });
+            }
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
             log("failed:", ex);
@@ -247,18 +301,16 @@ class EmployeeAdd extends Component {
         const Option = Select.Option;
         const {TextArea} = Input;
         const {getFieldDecorator} = this.props.form;
-        {/*办公地址选项*/
-        }
+        {/*办公地址选项*/}
         const officeAddressOptions = this.state.officeAddresses.map((value) =>
             <Option value={value} key={value}>{value}</Option>);
-        {/*职位选项*/
-        }
+        {/*职位选项*/}
         const positions = this.state.positions.map((value) =>
             <Option value={value} key={value}>{value}</Option>);
         return (
             <Row>
                 <Col className="centered">
-                    <h2 className="padding-top-bottom-16">添 加 员 工</h2>
+                    <h2 className="padding-top-bottom-16">员 工 编 辑</h2>
                 </Col>
                 <Col span={6} offset={9}>
                     <Form onSubmit={this.handleSubmit} className="login-form">
@@ -267,16 +319,15 @@ class EmployeeAdd extends Component {
                                 rules: [{required: true, message: '请输入员工姓名!'}],
                             })(
                                 <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
-                                       ref={(input) => {
-                                           this.textInput = input;
-                                       }}/>
+                                       ref={(input) =>this.textInput = input} defaultValue={this.state.employee.name}/>
                             )}
                         </FormItem>
                         <FormItem label="员工编号">
                             {getFieldDecorator('code', {
                                 rules: [{required: true, message: '请输员工编号!'}],
                             })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工编号"/>
+                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>}
+                                       placeholder="员工编号" defaultValue={this.state.employee.code}/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
@@ -284,7 +335,7 @@ class EmployeeAdd extends Component {
                                 rules: [{required: true, message: '请选择办公地址!'}],
                             })(
                                 <Select style={{width: '100%'}} placeholder="请选择办公地址"
-                                        onChange={this.handleOfficeAddressChange}>
+                                        defaultValue={this.state.employee.officeAddress}>
                                     {officeAddressOptions}
                                 </Select>
                             )}
@@ -295,7 +346,8 @@ class EmployeeAdd extends Component {
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
                                             onChange={this.handleInductionDateChange} format="YYYY-MM-DD"
-                                            placeholder="入职日期"/>
+                                            placeholder="入职日期"
+                                            defaultValue={moment(this.state.employee.inductionDate, "YYYY-MM-DD HH:mm:ss")}/>
                             )}
                         </FormItem>
                         <FormItem label="员工职位">
@@ -303,7 +355,7 @@ class EmployeeAdd extends Component {
                                 rules: [{required: true, message: '请选择职位!'}],
                             })(
                                 <Select style={{width: '100%'}} placeholder="请选择职位"
-                                        onChange={this.handleOfficeAddressChange}>
+                                        defaultValue={this.state.employee.position}>
                                     {positions}
                                 </Select>
                             )}
@@ -312,7 +364,8 @@ class EmployeeAdd extends Component {
                             {getFieldDecorator('remark', {
                                 rules: [{required: false, message: ''}],
                             })(
-                                <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"/>
+                                <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"
+                                          value={this.state.employee.remark}/>
                             )}
                         </FormItem>
                         <FormItem>
@@ -327,4 +380,4 @@ class EmployeeAdd extends Component {
     }
 }
 
-export default createForm()(EmployeeAdd);
+export default createForm()(EmployeeEdit);

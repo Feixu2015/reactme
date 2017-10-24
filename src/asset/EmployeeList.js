@@ -2,13 +2,12 @@
  * Created by biml on 2017/10/23.
  */
 import React, {Component} from "react";
-import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert} from "antd";
+import {Button, Col, Form, Icon, Input, Pagination, Row, Table, Tooltip} from "antd";
 import {createForm} from "rc-form";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {utils} from './Utils';
-import Moment from 'moment';
+import {fail, success, utils, employeeStatus} from "./Utils";
 
 /**
  * 员工列表组件
@@ -17,10 +16,24 @@ class EmployeeList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            failMsg: '',
+            loading: false,
+            operationResult: {
+                status: null,
+                message: null
+            },
             officeAddresses: [],
             positions: [],
-            pageIndex: 1
+            searchText: '',
+            employees: {
+                list: [],
+                meta: {
+                    total: 0,
+                    pages: 1,
+                    offset: 1,
+                    count: 0,
+                    limit: 10
+                }
+            }
         };
     }
 
@@ -32,124 +45,164 @@ class EmployeeList extends Component {
      * 根据关键词查询员工列表
      * @param keyWord 关键词
      */
-    handleQueryEmployeeList = (keyWord)=>{
-        const pageIndex = this.state.pageIndex;
-        const formData = JSON.stringify(values);
-        log('received values of form:', formData);
-        fetch(urlBase + `/employee/findByPage?keyword=${keyWord?"":keyWord}&page=${pageIndex}&limit=10`, {
-            method: 'post',
+    handleQueryEmployeeList = (keyWord) => {
+        const pageIndex = this.state.employees.meta.offset;
+        this.setState({
+            loading: true,
+            operationResult: {
+                status: null,
+                message: null
+            }
+        });
+        fetch(urlBase + `/employee/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${pageIndex}&limit=10`, {
+            method: 'get',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            },
-            body: formData
+            }
         }).then((response) => {
             log("response:", response);
             return response.json()
         }).then((json) => {
             log("json:", json);
             if ("success" === json.status) {
-                this.setState({
-                    failMsg: 'success',
-                    userName: values.userName
+                log("success: items size is ", json.list.length);
+                let list = [];
+                json.list.forEach((value, index) => {
+                    value.key = index;
+                    list.push(value);
                 });
-                log("success:", values.userName)
-                setTimeout(() => {
-                    // 1秒后执行添加成功后的回调
-                    if (this.props.onEmployeeAddCallback) {
-                        this.props.onEmployeeAddCallback(values.code);
+                this.setState({
+                    operationResult: {
+                        status: success,
+                        message: '查询完成!'
+                    },
+                    employees: {
+                        list: list,
+                        meta: json.meta
                     }
-                }, 1000);
-            } else if ('fail' === json.status) {
+                });
+            } else if (fail === json.status) {
                 log("fail:", json);
                 this.setState({
-                    failMsg: json.message
+                    operationResult: {
+                        status: success,
+                        message: json.message
+                    }
                 });
             } else {
                 log("fail:", json);
                 this.setState({
-                    failMsg: `${json.status} ${json.message}`
+                    operationResult: {
+                        status: success,
+                        message: `${json.status} ${json.message}`
+                    }
                 });
             }
+            this.setState({
+                loading: false
+            });
+            utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
             log("failed:", ex);
             this.setState({
-                failMsg: ex.message
+                operationResult: {
+                    status: success,
+                    message: ex.message
+                },
+                loading: false
             });
+            utils.showNotification(this.state.operationResult);
         });
     };
 
     /**
-     * 选择办公地点事件处理
+     * 搜索框输入改变
      * @param e
      */
-    handleOfficeAddressChange = (e) => {
-
-    };
-
-    /**
-     * 选择入职时间处理
-     * @param e
-     */
-    handleInductionDateChange = (e) => {
-        const date = e.format('YYYY-MM-DD')
-        log("inductionDate:", date);
-    };
-
-    /**
-     * 表单提交处理
-     * @param e
-     */
-    handleSubmit = (e) => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                const employeeName = values.name;
-                this.handleQueryEmployeeList(employeeName);
-            } else {
-                this.setState({
-                    failMsg: utils.combineValidateError(err).map((e) => <div key={e}>{e}</div>)
-                });
-                log(this.state.failMsg);
-            }
+    handleSearchTextChange = (e) => {
+        this.setState({
+            searchText: e.target.value
         });
+    };
+
+    /**
+     * 搜索事件处理
+     */
+    handleSearch = () => {
+        this.handleQueryEmployeeList(this.state.searchText);
     };
 
     render() {
-        const FormItem = Form.Item;
-        const {getFieldDecorator} = this.props.form;
-        const failMsg = this.state.failMsg;
+        // 定义员工表格列
+        const columns = [{
+            title: '姓名',
+            dataIndex: 'name',
+            key: 'name',
+            render: text => <a href="">{text}</a>,
+        }, {
+            title: '工号',
+            dataIndex: 'code',
+            key: 'code',
+        }, {
+            title: '办公地址',
+            dataIndex: 'officeAddress',
+            key: 'officeAddress',
+        }, {
+            title: '入职日期',
+            dataIndex: 'inductionDate',
+            key: 'inductionDate',
+        }, {
+            title: '职位',
+            dataIndex: 'position',
+            key: 'position',
+        }, {
+            title: '状态',
+            key: 'status',
+            render:(text, record)=> {
+                return (<span>{employeeStatus[text.status]}</span>);
+            }
+        }, {
+            title: '备注',
+            dataIndex: 'remark',
+            key: 'remark',
+        }, {
+            title: '操作',
+            key: 'action',
+            render: (text, record) => (
+                <span>
+                    <Tooltip overlay="编辑" text>
+                        <Button type="default" icon="edit" style={{color:'green'}} onClick={(e)=>this.props.onEmployeeEditClick(text.code, e)}/>
+                    </Tooltip>
+                    <span className="ant-divider"/>
+                    <Tooltip overlay="离职" text>
+                        <Button type="default" icon="user-delete" style={{color:'red'}}/>
+                    </Tooltip>
+                </span>
+            ),
+        }];
+        // 表格数据
+        const data = this.state.employees.list;
+        const paginationTotal = this.state.employees.meta.total;
+        const paginationCurrent = this.state.employees.meta.offset;
+        const searchText = this.state.searchText;
         return (
             <Row>
                 <Col className="centered">
-                    <h2 className="padding-top-bottom-20">添 加 员 工</h2>
+                    <h2 className="padding-top-bottom-16">员工列表</h2>
                 </Col>
-                <Col span={6} offset={9}>
-                    <Form onSubmit={this.handleSubmit} className="login-form">
-                        <FormItem>
-                            {getFieldDecorator('employeeName', {
-                                rules: [{required: true, message: '请输入员工姓名!'}],
-                            })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
-                                       ref={(input) => {
-                                           this.textInput = input;
-                                       }}/>
-                            )}
-                        </FormItem>
-                        <FormItem>
-                            <Button type="primary" htmlType="submit" className="margin-right-16"
-                                    onClick={this.handleSubmit}>确认</Button>
-                            <Button type="default">取消</Button>
-                        </FormItem>
-                    </Form>
-                    {
-                        '' === failMsg ?
-                            ('') :
-                            ('success' === failMsg ?
-                                    (<Alert message="添加成功！" type="success" showIcon/>) :
-                                    (<Alert message={failMsg} type="error" showIcon/>)
-                            )
-                    }
+                <Col>
+                    <Input placeholder="输入姓名搜索" style={{width: 200}} value={searchText}
+                           onChange={this.handleSearchTextChange}
+                           suffix={<Button className="search-btn" type="primary" size="small" icon="search"
+                                           onClick={this.handleSearch}/>}/>
+                    <div className="ant-divider"/>
+                    <Button icon="plus" onClick={this.props.onEmployeeAddClickCallback}>添加员工</Button>
+                </Col>
+                <Col style={{marginTop: 8}}>
+                    <Table columns={columns} dataSource={data} loading={this.state.loading}
+                           pagination={<Pagination defaultCurrent={1} current={paginationCurrent}
+                                                   total={paginationTotal}/>}/>
                 </Col>
             </Row>
         );

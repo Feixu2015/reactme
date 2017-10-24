@@ -6,6 +6,7 @@
     "antd": "^2.13.6",
     "fetch-polyfill": "^0.8.2",
     "history": "^4.7.2",
+    "moment": "^2.19.1",
     "rc-form": "^1.4.8",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",

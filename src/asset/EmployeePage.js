@@ -21,6 +21,8 @@ import asset from './asset.svg';
 import './AssetApp.css';
 import 'fetch-polyfill';
 import EmployeeAdd from './EmployeeAdd';
+import EmployeeList from './EmployeeList';
+import EmployeeEdit from './EmployeeEdit';
 import {log, urlBase} from './Config';
 import {utils} from './Utils';
 const FormItem = Form.Item;
@@ -42,38 +44,76 @@ class EmployeePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            action: Actions.add
+            action: Actions.default,
+            param: null
         };
     }
 
-    handleEmployeeAdd = (employeeCode)=>{
+    /**
+     * 添加完员工后的处理
+     * @param employeeCode 刚添加的员工的工号
+     */
+    handleEmployeeAdded = (employeeCode) => {
+        // 添加完员工后跳转值
+        this.setState({
+            action: Actions.default
+        });
+    };
 
+    /**
+     * 添加员工页面点击取消按钮的处理
+     */
+    handleEmployeeAddCancelCallback = () => {
+        this.setState({
+            action: Actions.default
+        });
+    };
+
+    /**
+     * 员工列表页面点击添加按钮的处理
+     */
+    handleEmployeeAddButtonClick = () => {
+        this.setState({
+            action: Actions.add
+        });
+    };
+
+    /**
+     * 员工列表页面点击编辑按钮的处理
+     * @param employeeCode 员工编码
+     */
+    handleEmployeeEditClick = (employeeCode) => {
+        this.setState({
+            action: Actions.edit,
+            param: {
+                employeeCode: employeeCode
+            }
+        });
     };
 
     render() {
-        const content = (()=>{
+        const param = this.state.param;
+        const content = (() => {
             let content = null;
             const action = this.state.action;
             switch (action) {
                 case Actions.default:
+                    content = <EmployeeList onEmployeeAddClickCallback={this.handleEmployeeAddButtonClick}
+                                            onEmployeeEditClick={this.handleEmployeeEditClick}/>;
                     break;
                 case Actions.add:
-                    content = <EmployeeAdd onEmployeeAddCallback={this.handleEmployeeAdd}/>;
+                    content = <EmployeeAdd onEmployeeAddCallback={this.handleEmployeeAdded}
+                                           onEmployeeAddCancelCallback={this.handleEmployeeAddCancelCallback}/>;
                     break;
                 case Actions.edit:
+                    content = <EmployeeEdit param={param} />;
                     break;
                 case Actions.show:
                     break;
             }
             return content;
         })();
-        return (
-            <Row>
-                <Col>
-                    {content}
-                </Col>
-            </Row>
-        );
+        return content;
     }
 }
 
