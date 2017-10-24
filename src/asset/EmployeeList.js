@@ -2,55 +2,65 @@
  * Created by biml on 2017/10/23.
  */
 import React, {Component} from "react";
-import {
-    Layout,
-    Menu,
-    Breadcrumb,
-    Icon,
-    Row,
-    Col,
-    Select,
-    DatePicker
-} from 'antd';
-import logo from './logo.png';
-import asset from './asset.svg';
-import './AssetApp.css';
-import {log} from './Config';
-import 'fetch-polyfill';
-import {log, urlBase} from './Config';
+import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert} from "antd";
+import {createForm} from "rc-form";
+import "./AssetApp.css";
+import "fetch-polyfill";
+import {log, urlBase} from "./Config";
 import {utils} from './Utils';
+import Moment from 'moment';
 
 /**
  * 员工列表组件
  */
-class EmployeeList extends Component{
-    constructor(props){
+class EmployeeList extends Component {
+    constructor(props) {
         super(props);
         this.state = {
-            officeAddresses:[]
+            failMsg: '',
+            officeAddresses: [],
+            positions: [],
+            pageIndex: 1
         };
     }
 
-    componentDidMount(){
-        // get office Addresses
-        let officeAddresses = [];
-        fetch(urlBase + "/dict/listByTypeCode?typeCode=574304b1-b726-11e7-828b-0a0027000009", {
-            method: 'get',
+    componentDidMount() {
+        this.handleQueryEmployeeList();
+    }
+
+    /**
+     * 根据关键词查询员工列表
+     * @param keyWord 关键词
+     */
+    handleQueryEmployeeList = (keyWord)=>{
+        const pageIndex = this.state.pageIndex;
+        const formData = JSON.stringify(values);
+        log('received values of form:', formData);
+        fetch(urlBase + `/employee/findByPage?keyword=${keyWord?"":keyWord}&page=${pageIndex}&limit=10`, {
+            method: 'post',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            }
-        }).then((response)=>{
+            },
+            body: formData
+        }).then((response) => {
             log("response:", response);
             return response.json()
-        }).then((json)=>{
+        }).then((json) => {
             log("json:", json);
             if ("success" === json.status) {
-                log("success:", values.userName);
-                json.list.forEach((value)=>{
-                    officeAddresses.push(value.name)
+                this.setState({
+                    failMsg: 'success',
+                    userName: values.userName
                 });
-            } else if('fail' === json.status){
+                log("success:", values.userName)
+                setTimeout(() => {
+                    // 1秒后执行添加成功后的回调
+                    if (this.props.onEmployeeAddCallback) {
+                        this.props.onEmployeeAddCallback(values.code);
+                    }
+                }, 1000);
+            } else if ('fail' === json.status) {
                 log("fail:", json);
                 this.setState({
                     failMsg: json.message
@@ -61,62 +71,89 @@ class EmployeeList extends Component{
                     failMsg: `${json.status} ${json.message}`
                 });
             }
-            this.setState({
-                officeAddresses: officeAddresses
-            });
-        }).catch((ex)=>{
+        }).catch((ex) => {
             log("failed:", ex);
-
+            this.setState({
+                failMsg: ex.message
+            });
         });
-    }
-    render(){
-        return(
-            <div>
-                <Row>
-                    <Col>
-                        <Form onSubmit={this.handleSubmit} className="login-form">
-                            <FormItem>
-                                {getFieldDecorator('name', {
-                                    rules: [{required: true, message: '请输入员工姓名!'}],
-                                })(
-                                    <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
-                                           ref={(input) => { this.textInput = input; }}/>
-                                )}
-                            </FormItem>
-                            <FormItem>
-                                {getFieldDecorator('code', {
-                                    rules: [{required: true, message: '请输员工编号!'}],
-                                })(
-                                    <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工编号"/>
-                                )}
-                            </FormItem>
-                            <FormItem>
-                                {getFieldDecorator('inductionDate', {
-                                    rules: [{required: true, message: '请选择入职日期!'}],
-                                })(
-                                    <DatePicker  prefix={<Icon type="user" style={{fontSize: 13}}/>} onChange={onChange}
-                                                 placeholder="入职日期" />
-                                )}
-                            </FormItem>
-                            <FormItem>
-                                {getFieldDecorator('officeAddress', {
-                                    rules: [{required: true, message: '请输员工编号!'}],
-                                })(
-                                    <Select defaultValue="lucy" style={{ width: 120 }} onChange={handleChange}>
-                                        {this.data.officeAdresses.map((value)=>
-                                            <Option value="jack">{value.name}</Option>)}
-                                    </Select>
-                                )}
-                            </FormItem>
-                            <FormItem>
-                                <Button type="primary" htmlType="submit" className="login-form-button">取消</Button>
-                                <Button type="primary" htmlType="submit" className="login-form-button">确认</Button>
-                            </FormItem>
-                        </Form>
-                    </Col>
-                </Row>
-            </div>
+    };
+
+    /**
+     * 选择办公地点事件处理
+     * @param e
+     */
+    handleOfficeAddressChange = (e) => {
+
+    };
+
+    /**
+     * 选择入职时间处理
+     * @param e
+     */
+    handleInductionDateChange = (e) => {
+        const date = e.format('YYYY-MM-DD')
+        log("inductionDate:", date);
+    };
+
+    /**
+     * 表单提交处理
+     * @param e
+     */
+    handleSubmit = (e) => {
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                const employeeName = values.name;
+                this.handleQueryEmployeeList(employeeName);
+            } else {
+                this.setState({
+                    failMsg: utils.combineValidateError(err).map((e) => <div key={e}>{e}</div>)
+                });
+                log(this.state.failMsg);
+            }
+        });
+    };
+
+    render() {
+        const FormItem = Form.Item;
+        const {getFieldDecorator} = this.props.form;
+        const failMsg = this.state.failMsg;
+        return (
+            <Row>
+                <Col className="centered">
+                    <h2 className="padding-top-bottom-20">添 加 员 工</h2>
+                </Col>
+                <Col span={6} offset={9}>
+                    <Form onSubmit={this.handleSubmit} className="login-form">
+                        <FormItem>
+                            {getFieldDecorator('employeeName', {
+                                rules: [{required: true, message: '请输入员工姓名!'}],
+                            })(
+                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
+                                       ref={(input) => {
+                                           this.textInput = input;
+                                       }}/>
+                            )}
+                        </FormItem>
+                        <FormItem>
+                            <Button type="primary" htmlType="submit" className="margin-right-16"
+                                    onClick={this.handleSubmit}>确认</Button>
+                            <Button type="default">取消</Button>
+                        </FormItem>
+                    </Form>
+                    {
+                        '' === failMsg ?
+                            ('') :
+                            ('success' === failMsg ?
+                                    (<Alert message="添加成功！" type="success" showIcon/>) :
+                                    (<Alert message={failMsg} type="error" showIcon/>)
+                            )
+                    }
+                </Col>
+            </Row>
         );
     }
 }
-export default EmployeeList;
+
+export default createForm()(EmployeeList);

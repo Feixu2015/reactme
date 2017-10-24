@@ -9,7 +9,7 @@ import asset from './asset.svg';
 import {log} from './Config';
 import Login, {LoginOut} from './Login';
 import AssetList from './AssetList';
-import EmployeeList from './EmployeeList';
+import EmployeeList from './EmployeePage';
 
 const {SubMenu} = Menu;
 const {Header, Footer, Content, Sider} = Layout;
@@ -21,8 +21,8 @@ class AssetApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            page: 'login',
-            userName: '张三'
+            page: 'employee',
+            userName: 'mock'
         }
     }
 
@@ -33,7 +33,7 @@ class AssetApp extends Component {
      * e.key        为菜单项的key
      * e.keyPath    为菜单项的key路径
      */
-    handleLeftMenuClick = (e)=>{
+    handleLeftMenuClick = (e) => {
         this.setState({
             page: e.key
         });
@@ -44,9 +44,9 @@ class AssetApp extends Component {
      * 处理登录成功的回调
      * @param userName 当前登录的用户名
      */
-    handleLoginCallback = (userName)=>{
+    handleLoginCallback = (userName) => {
         this.setState({
-            page:'asset',
+            page: 'asset',
             userName: userName
         })
     };
@@ -54,27 +54,30 @@ class AssetApp extends Component {
     /**
      * 处理登出的回调
      */
-    handleLoginOutCallback = ()=>{
+    handleLoginOutCallback = () => {
         this.setState({
-            page:'login',
+            page: 'login',
             userName: ''
         })
     };
 
     render() {
         const page = this.state.page;
-        let content = null;
-        switch (page) {
-            case "asset":
-                content = (<AssetList/>);
-                break;
-            case "employee":
-                content = (<EmployeeList/>);
-                break;
-            default:
-                //log("不支持的菜单点击事件！");
-                break;
-        }
+        const content = (() => {
+            let content = null;
+            switch (page) {
+                case "asset":
+                    content = <AssetList/>;
+                    break;
+                case "employee":
+                    content = <EmployeeList/>;
+                    break;
+                default:
+                    //log("不支持的菜单点击事件！");
+                    break;
+            }
+            return content;
+        })();
         return (
             <Layout className="full-screen-absolute">
                 <Header className="header">
@@ -84,20 +87,21 @@ class AssetApp extends Component {
 
                         </Col>
                         <Col span={4} offset={16} className="align-right">
-                            { !(page === 'login') && <LoginOut onLoginOut={this.handleLoginOutCallback} name={this.state.userName}/>}
+                            { !(page === 'login') &&
+                            <LoginOut onLoginOut={this.handleLoginOutCallback} name={this.state.userName}/>}
                         </Col>
                     </Row>
                 </Header>
                 {page === 'login' ? (
                     /* 登录页 */
-                        <Login onLoginCallback={this.handleLoginCallback}/>
-                ):(
+                    <Login onLoginCallback={this.handleLoginCallback}/>
+                ) : (
                     <Layout>
                         <Sider width={200} style={{background: '#fff'}}>
                             <Menu
                                 mode="inline"
-                                defaultSelectedKeys={['1']}
-                                defaultOpenKeys={['sub1']}
+                                defaultSelectedKeys={['asset']}
+                                defaultOpenKeys={['assets','employees']}
                                 style={{height: '100%', borderRight: 0}}
                                 onClick={this.handleLeftMenuClick}
                             >
@@ -121,7 +125,7 @@ class AssetApp extends Component {
                         </Layout>
                     </Layout>
                 )}
-                <Footer className="centered-footer">
+                <Footer className="centered">
                     IDCOS AMS @ 2017. All right reserved.
                 </Footer>
             </Layout>
