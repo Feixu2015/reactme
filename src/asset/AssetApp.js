@@ -2,14 +2,15 @@
  * Created by ice_b on 2017/10/22.
  */
 import React, {Component} from "react";
-import {Layout, Menu, Breadcrumb, Icon, Row, Col} from 'antd';
+import {Layout, Menu, Breadcrumb, Icon, Row, Col, Modal} from 'antd';
 import './AssetApp.css';
 import logo from './logo.png';
 import asset from './asset.svg';
 import {log} from './Config';
 import Login, {LoginOut} from './Login';
 import AssetList from './AssetList';
-import EmployeeList from './EmployeePage';
+import EmployeePage from './EmployeePage';
+import EmployeeShow from './EmployeeShow';
 
 const {SubMenu} = Menu;
 const {Header, Footer, Content, Sider} = Layout;
@@ -70,7 +71,7 @@ class AssetApp extends Component {
                     content = <AssetList/>;
                     break;
                 case "employee":
-                    content = <EmployeeList/>;
+                    content = <EmployeePage />;
                     break;
                 default:
                     //log("不支持的菜单点击事件！");

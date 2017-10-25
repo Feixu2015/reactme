@@ -61,9 +61,9 @@ class EmployeePage extends Component {
     };
 
     /**
-     * 添加员工页面点击取消按钮的处理
+     * 点击取消按添加／编辑钮的处理
      */
-    handleEmployeeAddCancelCallback = () => {
+    handleEmployeeBtnCancelCallback = () => {
         this.setState({
             action: Actions.default
         });
@@ -80,13 +80,13 @@ class EmployeePage extends Component {
 
     /**
      * 员工列表页面点击编辑按钮的处理
-     * @param employeeCode 员工编码
+     * @param employeeId 员工id
      */
-    handleEmployeeEditClick = (employeeCode) => {
+    handleEmployeeEditClick = (employeeId) => {
         this.setState({
             action: Actions.edit,
             param: {
-                employeeCode: employeeCode
+                employeeId: employeeId
             }
         });
     };
@@ -103,10 +103,11 @@ class EmployeePage extends Component {
                     break;
                 case Actions.add:
                     content = <EmployeeAdd onEmployeeAddCallback={this.handleEmployeeAdded}
-                                           onEmployeeAddCancelCallback={this.handleEmployeeAddCancelCallback}/>;
+                                           onEmployeeAddCancelCallback={this.handleEmployeeBtnCancelCallback}/>;
                     break;
                 case Actions.edit:
-                    content = <EmployeeEdit param={param} />;
+                    content = <EmployeeEdit param={param} onEmployeeEditCallback={this.handleEmployeeBtnCancelCallback}
+                                            onEmployeeEditCancelCallback={this.handleEmployeeBtnCancelCallback}/>;
                     break;
                 case Actions.show:
                     break;

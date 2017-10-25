@@ -142,7 +142,7 @@ class EmployeeEdit extends Component {
         });
 
         // get employee
-        fetch(urlBase + `/employee/findByCode/${this.props.param.employeeCode}`, {
+        fetch(urlBase + `/employee/${this.props.param.employeeId}`, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -164,6 +164,7 @@ class EmployeeEdit extends Component {
                 this.setState({
                     employee: json.item
                 });
+                log("employee:", JSON.stringify(json.item));
             } else if (fail === json.status) {
                 log("fail:", json);
                 this.setState({
@@ -229,8 +230,8 @@ class EmployeeEdit extends Component {
                 values.inductionDate = values.inductionDate.format('YYYY-MM-DD HH:mm:ss');
                 const formData = JSON.stringify(values);
                 log('received values of form:', formData);
-                fetch(urlBase + "/employee", {
-                    method: 'post',
+                fetch(urlBase + `/employee/${this.props.param.employeeId}`, {
+                    method: 'put',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
@@ -251,8 +252,8 @@ class EmployeeEdit extends Component {
                         });
                         setTimeout(() => {
                             // 1秒后执行添加成功后的回调
-                            if (this.props.onEmployeeAddCallback) {
-                                this.props.onEmployeeAddCallback(values.code);
+                            if (this.props.onEmployeeEditCallback) {
+                                this.props.onEmployeeEditCallback(values.code);
                             }
                         }, 1000);
                     } else if (fail === json.status) {
@@ -301,10 +302,12 @@ class EmployeeEdit extends Component {
         const Option = Select.Option;
         const {TextArea} = Input;
         const {getFieldDecorator} = this.props.form;
-        {/*办公地址选项*/}
+        {/*办公地址选项*/
+        }
         const officeAddressOptions = this.state.officeAddresses.map((value) =>
             <Option value={value} key={value}>{value}</Option>);
-        {/*职位选项*/}
+        {/*职位选项*/
+        }
         const positions = this.state.positions.map((value) =>
             <Option value={value} key={value}>{value}</Option>);
         return (
@@ -316,64 +319,74 @@ class EmployeeEdit extends Component {
                     <Form onSubmit={this.handleSubmit} className="login-form">
                         <FormItem label="员工姓名">
                             {getFieldDecorator('name', {
+                                initialValue: this.state.employee.name,
                                 rules: [{required: true, message: '请输入员工姓名!'}],
                             })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
-                                       ref={(input) =>this.textInput = input} defaultValue={this.state.employee.name}/>
+                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
+                                       ref={(input) => this.textInput = input}/>
                             )}
                         </FormItem>
-                        <FormItem label="员工编号">
+                        <FormItem label="员工工号">
                             {getFieldDecorator('code', {
-                                rules: [{required: true, message: '请输员工编号!'}],
+                                initialValue: this.state.employee.code,
+                                rules: [{required: true, message: '请输员工工号!'}],
                             })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>}
-                                       placeholder="员工编号" defaultValue={this.state.employee.code}/>
+                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>}
+                                       placeholder="员工工号"/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
                             {getFieldDecorator('officeAddress', {
+                                initialValue: this.state.employee.officeAddress,
                                 rules: [{required: true, message: '请选择办公地址!'}],
                             })(
-                                <Select style={{width: '100%'}} placeholder="请选择办公地址"
-                                        defaultValue={this.state.employee.officeAddress}>
+                                <Select style={{width: '100%'}} placeholder="请选择办公地址">
                                     {officeAddressOptions}
                                 </Select>
                             )}
                         </FormItem>
                         <FormItem label="入职日期">
                             {getFieldDecorator('inductionDate', {
+                                initialValue: moment(this.state.employee.inductionDate, "YYYY-MM-DD HH:mm:ss"),
                                 rules: [{required: true, message: '请选择入职日期!'}],
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
                                             onChange={this.handleInductionDateChange} format="YYYY-MM-DD"
-                                            placeholder="入职日期"
-                                            defaultValue={moment(this.state.employee.inductionDate, "YYYY-MM-DD HH:mm:ss")}/>
+                                            placeholder="入职日期"/>
                             )}
                         </FormItem>
                         <FormItem label="员工职位">
                             {getFieldDecorator('position', {
+                                initialValue: this.state.employee.position,
                                 rules: [{required: true, message: '请选择职位!'}],
                             })(
-                                <Select style={{width: '100%'}} placeholder="请选择职位"
-                                        defaultValue={this.state.employee.position}>
+                                <Select style={{width: '100%'}} placeholder="请选择职位">
                                     {positions}
                                 </Select>
                             )}
                         </FormItem>
                         <FormItem label="备注">
                             {getFieldDecorator('remark', {
+                                initialValue: this.state.employee.remark,
                                 rules: [{required: false, message: ''}],
                             })(
-                                <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"
-                                          value={this.state.employee.remark}/>
+                                <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"/>
                             )}
                         </FormItem>
                         <FormItem>
                             <Button type="primary" htmlType="submit" className="margin-right-16"
-                                    onClick={this.handleSubmit}>确认</Button>
-                            <Button type="default" onClick={this.props.onEmployeeAddCancelCallback}>取消</Button>
+                                    onClick={this.handleSubmit}>保存</Button>
+                            <Button type="default" onClick={this.props.onEmployeeEditCancelCallback}>取消</Button>
                         </FormItem>
                     </Form>
+                    {/*{
+                     utils.isStrEmpty(this.state.operationResult.status) ?
+                     ('') :
+                     (success === this.state.operationResult.status ?
+                     (<Alert message="添加成功！" type="success" showIcon/>) :
+                     (<Alert message={this.state.operationResult.message} type="error" showIcon/>)
+                     )
+                     }*/}
                 </Col>
             </Row>
         );

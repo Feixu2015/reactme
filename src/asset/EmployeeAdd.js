@@ -4,6 +4,7 @@
 import React, {Component} from "react";
 import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert, notification} from "antd";
 import {createForm} from "rc-form";
+import moment from 'moment';
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
@@ -96,7 +97,7 @@ class EmployeeAdd extends Component {
         }).then((json) => {
             log("json:", json);
             let positions = [];
-            if ("success" === json.status) {
+            if (success === json.status) {
                 log("success:", json.message);
                 this.setState({
                     operationResult: {
@@ -266,17 +267,17 @@ class EmployeeAdd extends Component {
                             {getFieldDecorator('name', {
                                 rules: [{required: true, message: '请输入员工姓名!'}],
                             })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
+                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
                                        ref={(input) => {
                                            this.textInput = input;
                                        }}/>
                             )}
                         </FormItem>
-                        <FormItem label="员工编号">
+                        <FormItem label="员工工号">
                             {getFieldDecorator('code', {
-                                rules: [{required: true, message: '请输员工编号!'}],
+                                rules: [{required: true, message: '请输员工工号!'}],
                             })(
-                                <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工编号"/>
+                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="员工工号"/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
@@ -291,6 +292,7 @@ class EmployeeAdd extends Component {
                         </FormItem>
                         <FormItem label="入职日期">
                             {getFieldDecorator('inductionDate', {
+                                initialValue: moment(),
                                 rules: [{required: true, message: '请选择入职日期!'}],
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}

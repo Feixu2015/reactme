@@ -55,13 +55,24 @@
     padding-bottom: 12px;
 }
 
-.overflow-scroll{
+.overflow-scroll {
     overflow: auto;
 }
 
-.icon-success{
-    color:green;
+.icon-success {
+    color: green;
 }
-.icon-fail{
-    color:red;
+
+.icon-fail {
+    color: red;
+}
+
+.color-blue {
+    color: dodgerblue;
+}
+
+.link-blue{
+    color: dodgerblue;
+    text-decoration: underline;
+    cursor: pointer;
 }

@@ -9,12 +9,17 @@ export const success = "success";
 export const fail = "fail";
 export const employeeStatus = {
     induction: '在职',
-    demission: '离职'
+    dimission: '离职'
 };
 export const equipmentSatus = {
     inuse: '使用中',
     unused: '未使用'
 };
+/**
+ * 发生错误时提示信息停留时间，单位秒
+ * @type {number}
+ */
+export const ErrorNotifyTime = 5;
 
 /**
  * 消息对应的图标
@@ -24,6 +29,15 @@ const notificationIconMap = {
     success: "check",
     fail: "close"
 };
+
+/**
+ * 显示文字映射
+ * @type {{success: string, fail: string}}
+ */
+const msgMap = {
+    success:'成功',
+    fail:'失败'
+}
 
 /**
  * 消息对应的样式名
@@ -51,16 +65,19 @@ export const utils = {
     },
     /**
      * 显示简单提示通知
-     * @param notifyData
+     * @param notifyData 通知信息
+     * @param handleClose 关闭后处理事件
      */
-    showNotification: (notifyData) => {
+    showNotification: (notifyData, handleClose) => {
+        console.log("notification", JSON.stringify(notifyData));
         if(notifyData && notifyData.status && notifyData.status !== '') {
             notification.open({
-                message: notifyData.status,
+                message: msgMap[notifyData.status],
                 description: notifyData.message,
                 icon: <Icon type={notificationIconMap[notifyData.status]}
                             className={notificationIconClassMap[notifyData.status]}/>,
-                duration: notifyData.duration ? notifyData.duration : 3
+                duration: notifyData.duration ? notifyData.duration : 3,
+                onClose: handleClose
             });
         } else {
             console.log("did not show notification.")
