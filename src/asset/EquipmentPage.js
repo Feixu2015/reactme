@@ -1,5 +1,5 @@
 /**
- * Created by biml on 2017/10/23.
+ * Created by biml on 2017/10/26.
  */
 import React, {Component} from "react";
 import {
@@ -20,9 +20,9 @@ import logo from './logo.png';
 import asset from './asset.svg';
 import './AssetApp.css';
 import 'fetch-polyfill';
-import EmployeeAdd from './EmployeeAdd';
-import EmployeeList from './EmployeeList';
-import EmployeeEdit from './EmployeeEdit';
+import EquipmentAdd from './EquipmentAdd';
+import EquipmentList from './EquipmentList';
+import EquipmentEdit from './EquipmentEdit';
 import {log, urlBase} from './Config';
 import {utils} from './Utils';
 const FormItem = Form.Item;
@@ -31,18 +31,18 @@ const FormItem = Form.Item;
  * @type {{default: string, add: string, edit: string, show: string}}
  */
 const Actions = {
-    // 员工列表
+    // 资产列表
     default: 'default',
-    // 员工添加
+    // 新增资产
     add: 'add',
-    // 员工编辑
+    // 编辑资产
     edit: 'edit'
 };
 
 /**
- * 员工列表组件
+ * 资产页面组件
  */
-class EmployeePage extends Component {
+class EquipmentPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -52,11 +52,11 @@ class EmployeePage extends Component {
     }
 
     /**
-     * 添加完员工后的处理
-     * @param employeeCode 刚添加的员工的工号
+     * 添加完资产后的处理
+     * @param equipmentCode 刚添加的资产的编号
      */
-    handleEmployeeAdded = (employeeCode) => {
-        // 添加完员工后跳转值
+    handleEquipmentAdded = (equipmentCode) => {
+        // 添加完资产后跳转值
         this.setState({
             action: Actions.default
         });
@@ -65,30 +65,30 @@ class EmployeePage extends Component {
     /**
      * 点击取消按添加／编辑钮的处理
      */
-    handleEmployeeBtnCancelCallback = () => {
+    handleEquipmentBtnCancelCallback = () => {
         this.setState({
             action: Actions.default
         });
     };
 
     /**
-     * 员工列表页面点击添加按钮的处理
+     * 资产列表页面点击添加按钮的处理
      */
-    handleEmployeeAddButtonClick = () => {
+    handleEquipmentAddButtonClick = () => {
         this.setState({
             action: Actions.add
         });
     };
 
     /**
-     * 员工列表页面点击编辑按钮的处理
-     * @param employeeId 员工id
+     * 资产列表页面点击编辑按钮的处理
+     * @param equipmentId 资产id
      */
-    handleEmployeeEditClick = (employeeId) => {
+    handleEquipmentEditClick = (equipmentId) => {
         this.setState({
             action: Actions.edit,
             param: {
-                employeeId: employeeId
+                equipmentId: equipmentId
             }
         });
     };
@@ -100,18 +100,19 @@ class EmployeePage extends Component {
             const action = this.state.action;
             switch (action) {
                 case Actions.default:
-                    content = <EmployeeList onEmployeeAddClickCallback={this.handleEmployeeAddButtonClick}
-                                            onEmployeeEditClick={this.handleEmployeeEditClick}/>;
+                    content = <EquipmentList onEquipmentAddClickCallback={this.handleEquipmentAddButtonClick}
+                                            onEquipmentEditClick={this.handleEquipmentEditClick}/>;
                     break;
                 case Actions.add:
-                    content = <EmployeeAdd onEmployeeAddCallback={this.handleEmployeeAdded}
-                                           onEmployeeAddCancelCallback={this.handleEmployeeBtnCancelCallback}/>;
+                    content = <EquipmentAdd onEquipmentAddCallback={this.handleEquipmentAdded}
+                                           onEquipmentAddCancelCallback={this.handleEquipmentBtnCancelCallback}/>;
                     break;
                 case Actions.edit:
-                    content = <EmployeeEdit param={param} onEmployeeEditCallback={this.handleEmployeeBtnCancelCallback}
-                                            onEmployeeEditCancelCallback={this.handleEmployeeBtnCancelCallback}/>;
+                    content = <EquipmentEdit param={param} onEquipmentEditCallback={this.handleEquipmentBtnCancelCallback}
+                                            onEquipmentEditCancelCallback={this.handleEquipmentBtnCancelCallback}/>;
                     break;
-                case Actions.show:
+                default:
+                    content = "nonsupport";
                     break;
             }
             return content;
@@ -120,4 +121,4 @@ class EmployeePage extends Component {
     }
 }
 
-export default createForm()(EmployeePage);
+export default createForm()(EquipmentPage);

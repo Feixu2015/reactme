@@ -1,5 +1,5 @@
 /**
- * Created by biml on 2017/10/23.
+ * Created by biml on 2017/10/26.
  */
 import React, {Component} from "react";
 import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert, notification} from "antd";
@@ -11,9 +11,9 @@ import {log, urlBase} from "./Config";
 import {utils, success, fail} from './Utils';
 
 /**
- * 添加员工组件
+ * 添加资产组件
  */
-class EmployeeAdd extends Component {
+class EquipmentAdd extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -82,7 +82,6 @@ class EmployeeAdd extends Component {
             });
             utils.showNotification(this.state.operationResult);
         });
-
 
         // get position
         fetch(urlBase + "/dict/listByTypeCode?typeCode=5742cc8f-b726-11e7-828b-0a0027000009", {
@@ -168,7 +167,7 @@ class EmployeeAdd extends Component {
                 values.inductionDate = values.inductionDate.format('YYYY-MM-DD HH:mm:ss');
                 const formData = JSON.stringify(values);
                 log('received values of form:', formData);
-                fetch(urlBase + "/employee", {
+                fetch(urlBase + "/equipment", {
                     method: 'post',
                     headers: {
                         'Accept': 'application/json',
@@ -190,8 +189,8 @@ class EmployeeAdd extends Component {
                         });
                         setTimeout(() => {
                             // 1秒后执行添加成功后的回调
-                            if (this.props.onEmployeeAddCallback) {
-                                this.props.onEmployeeAddCallback(values.code);
+                            if (this.props.onEquipmentAddCallback) {
+                                this.props.onEquipmentAddCallback(values.code);
                             }
                         }, 1000);
                     } else if (fail === json.status) {
@@ -255,21 +254,21 @@ class EmployeeAdd extends Component {
                 </Col>
                 <Col span={6} offset={9}>
                     <Form onSubmit={this.handleSubmit} className="login-form">
-                        <FormItem label="员工姓名">
+                        <FormItem label="资产姓名">
                             {getFieldDecorator('name', {
-                                rules: [{required: true, message: '请输入员工姓名!'}],
+                                rules: [{required: true, message: '请输入资产姓名!'}],
                             })(
-                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
+                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="资产姓名"
                                        ref={(input) => {
                                            this.textInput = input;
                                        }}/>
                             )}
                         </FormItem>
-                        <FormItem label="员工工号">
+                        <FormItem label="资产编号">
                             {getFieldDecorator('code', {
-                                rules: [{required: true, message: '请输员工工号!'}],
+                                rules: [{required: true, message: '请输资产编号!'}],
                             })(
-                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="员工工号"/>
+                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="资产编号"/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
@@ -292,7 +291,7 @@ class EmployeeAdd extends Component {
                                             placeholder="入职日期"/>
                             )}
                         </FormItem>
-                        <FormItem label="员工职位">
+                        <FormItem label="资产职位">
                             {getFieldDecorator('position', {
                                 rules: [{required: true, message: '请选择职位!'}],
                             })(
@@ -312,7 +311,7 @@ class EmployeeAdd extends Component {
                         <FormItem>
                             <Button type="primary" htmlType="submit" className="margin-right-16"
                                     onClick={this.handleSubmit}>确认</Button>
-                            <Button type="default" onClick={this.props.onEmployeeAddCancelCallback}>取消</Button>
+                            <Button type="default" onClick={this.props.onEquipmentAddCancelCallback}>取消</Button>
                         </FormItem>
                     </Form>
                 </Col>
@@ -321,4 +320,4 @@ class EmployeeAdd extends Component {
     }
 }
 
-export default createForm()(EmployeeAdd);
+export default createForm()(EquipmentAdd);

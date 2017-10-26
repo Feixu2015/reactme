@@ -2,15 +2,13 @@
  * Created by ice_b on 2017/10/22.
  */
 import React, {Component} from "react";
-import {Layout, Menu, Breadcrumb, Icon, Row, Col, Modal} from 'antd';
-import './AssetApp.css';
-import logo from './logo.png';
-import asset from './asset.svg';
-import {log} from './Config';
-import Login, {LoginOut} from './Login';
-import AssetList from './AssetList';
-import EmployeePage from './EmployeePage';
-import EmployeeShow from './EmployeeShow';
+import {Col, Icon, Layout, Menu, Row, Button} from "antd";
+import "./AssetApp.css";
+import logo from "./logo.png";
+import {log} from "./Config";
+import Login, {LoginOut} from "./Login";
+import EquipmentPage from "./EquipmentPage";
+import EmployeePage from "./EmployeePage";
 
 const {SubMenu} = Menu;
 const {Header, Footer, Content, Sider} = Layout;
@@ -22,7 +20,7 @@ class AssetApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            page: 'employee',
+            page: 'equipment',
             userName: 'mock'
         }
     }
@@ -47,7 +45,7 @@ class AssetApp extends Component {
      */
     handleLoginCallback = (userName) => {
         this.setState({
-            page: 'asset',
+            page: 'equipment',
             userName: userName
         })
     };
@@ -67,8 +65,8 @@ class AssetApp extends Component {
         const content = (() => {
             let content = null;
             switch (page) {
-                case "asset":
-                    content = <AssetList/>;
+                case "equipment":
+                    content = <EquipmentPage />;
                     break;
                 case "employee":
                     content = <EmployeePage />;
@@ -98,16 +96,12 @@ class AssetApp extends Component {
                     <Login onLoginCallback={this.handleLoginCallback}/>
                 ) : (
                     <Layout>
-                        <Sider width={200} style={{background: '#fff'}}>
-                            <Menu
-                                mode="inline"
-                                defaultSelectedKeys={['asset']}
-                                defaultOpenKeys={['assets','employees']}
-                                style={{height: '100%', borderRight: 0}}
-                                onClick={this.handleLeftMenuClick}
-                            >
-                                <SubMenu key="assets" title={<span><Icon type="switcher"/>资产管理</span>}>
-                                    <Menu.Item key="asset">资产</Menu.Item>
+                        <Sider style={{background: '#fff', width: 200}}>
+                            <Menu mode="vertical" defaultSelectedKeys={['equipment']}
+                                  defaultOpenKeys={['equipments','employees']} style={{height: '100%', borderRight: 0}}
+                                  onClick={this.handleLeftMenuClick} inlineCollapsed={this.state.menuCollapsed}>
+                                <SubMenu key="equipments" title={<span><Icon type="switcher"/>资产管理</span>}>
+                                    <Menu.Item key="equipment">资产</Menu.Item>
                                 </SubMenu>
                                 <SubMenu key="employees" title={<span><Icon type="user"/>员工管理</span>}>
                                     <Menu.Item key="employee">员工</Menu.Item>

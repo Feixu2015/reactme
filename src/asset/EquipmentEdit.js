@@ -1,19 +1,19 @@
 /**
- * Created by biml on 2017/10/23.
+ * Created by biml on 2017/10/26.
  */
 import React, {Component} from "react";
 import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert, notification} from "antd";
 import {createForm} from "rc-form";
-import moment from 'moment';
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
 import {utils, success, fail} from './Utils';
+import moment from 'moment';
 
 /**
- * 添加员工组件
+ * 编辑资产组件
  */
-class EmployeeAdd extends Component {
+class EquipmentEdit extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -22,7 +22,8 @@ class EmployeeAdd extends Component {
                 message: null
             },
             officeAddresses: [],
-            positions: []
+            positions: [],
+            equipment: {}
         };
     }
 
@@ -97,7 +98,7 @@ class EmployeeAdd extends Component {
         }).then((json) => {
             log("json:", json);
             let positions = [];
-            if (success === json.status) {
+            if ("success" === json.status) {
                 log("success:", json.message);
                 this.setState({
                     operationResult: {
@@ -139,7 +140,68 @@ class EmployeeAdd extends Component {
             });
             utils.showNotification(this.state.operationResult);
         });
+
+        // get equipment
+        fetch(urlBase + `/equipment/${this.props.param.equipmentId}`, {
+            method: 'get',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then((response) => {
+            log("response:", response);
+            return response.json()
+        }).then((json) => {
+            log("json:", json);
+            if ("success" === json.status) {
+                log("success:", json.message);
+                this.setState({
+                    operationResult: {
+                        status: null,
+                        message: null
+                    }
+                });
+                this.setState({
+                    equipment: json.item
+                });
+                log("equipment:", JSON.stringify(json.item));
+            } else if (fail === json.status) {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: json.message
+                    }
+                });
+            } else {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: `${json.status} ${json.message}`
+                    }
+                });
+            }
+            utils.showNotification(this.state.operationResult);
+        }).catch((ex) => {
+            log("failed:", ex);
+            this.setState({
+                operationResult: {
+                    status: fail,
+                    message: ex.message
+                }
+            });
+            utils.showNotification(this.state.operationResult);
+        });
     }
+
+    /**
+     * 选择办公地点事件处理
+     * @param e
+     */
+    handleOfficeAddressChange = (e) => {
+
+    };
 
     /**
      * 选择入职时间处理
@@ -168,8 +230,8 @@ class EmployeeAdd extends Component {
                 values.inductionDate = values.inductionDate.format('YYYY-MM-DD HH:mm:ss');
                 const formData = JSON.stringify(values);
                 log('received values of form:', formData);
-                fetch(urlBase + "/employee", {
-                    method: 'post',
+                fetch(urlBase + `/equipment/${this.props.param.equipmentId}`, {
+                    method: 'put',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
@@ -190,8 +252,8 @@ class EmployeeAdd extends Component {
                         });
                         setTimeout(() => {
                             // 1秒后执行添加成功后的回调
-                            if (this.props.onEmployeeAddCallback) {
-                                this.props.onEmployeeAddCallback(values.code);
+                            if (this.props.onEquipmentEditCallback) {
+                                this.props.onEquipmentEditCallback(values.code);
                             }
                         }, 1000);
                     } else if (fail === json.status) {
@@ -251,40 +313,41 @@ class EmployeeAdd extends Component {
         return (
             <Row>
                 <Col className="centered">
-                    <h2 className="padding-top-bottom-16">添 加 员 工</h2>
+                    <h2 className="padding-top-bottom-16">资产编辑</h2>
                 </Col>
                 <Col span={6} offset={9}>
                     <Form onSubmit={this.handleSubmit} className="login-form">
-                        <FormItem label="员工姓名">
+                        <FormItem label="资产姓名">
                             {getFieldDecorator('name', {
-                                rules: [{required: true, message: '请输入员工姓名!'}],
+                                initialValue: this.state.equipment.name,
+                                rules: [{required: true, message: '请输入资产姓名!'}],
                             })(
-                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="员工姓名"
-                                       ref={(input) => {
-                                           this.textInput = input;
-                                       }}/>
+                                <Input suffix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="资产姓名"
+                                       ref={(input) => this.textInput = input}/>
                             )}
                         </FormItem>
-                        <FormItem label="员工工号">
+                        <FormItem label="资产编号">
                             {getFieldDecorator('code', {
-                                rules: [{required: true, message: '请输员工工号!'}],
+                                initialValue: this.state.equipment.code,
+                                rules: [{required: true, message: '请输资产编号!'}],
                             })(
-                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="员工工号"/>
+                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>}
+                                       placeholder="资产编号"/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
                             {getFieldDecorator('officeAddress', {
+                                initialValue: this.state.equipment.officeAddress,
                                 rules: [{required: true, message: '请选择办公地址!'}],
                             })(
-                                <Select style={{width: '100%'}} placeholder="请选择办公地址"
-                                        onChange={this.handleOfficeAddressChange}>
+                                <Select style={{width: '100%'}} placeholder="请选择办公地址">
                                     {officeAddressOptions}
                                 </Select>
                             )}
                         </FormItem>
                         <FormItem label="入职日期">
                             {getFieldDecorator('inductionDate', {
-                                initialValue: moment(),
+                                initialValue: moment(this.state.equipment.inductionDate, "YYYY-MM-DD HH:mm:ss"),
                                 rules: [{required: true, message: '请选择入职日期!'}],
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
@@ -292,18 +355,19 @@ class EmployeeAdd extends Component {
                                             placeholder="入职日期"/>
                             )}
                         </FormItem>
-                        <FormItem label="员工职位">
+                        <FormItem label="资产职位">
                             {getFieldDecorator('position', {
+                                initialValue: this.state.equipment.position,
                                 rules: [{required: true, message: '请选择职位!'}],
                             })(
-                                <Select style={{width: '100%'}} placeholder="请选择职位"
-                                        onChange={this.handleOfficeAddressChange}>
+                                <Select style={{width: '100%'}} placeholder="请选择职位">
                                     {positions}
                                 </Select>
                             )}
                         </FormItem>
                         <FormItem label="备注">
                             {getFieldDecorator('remark', {
+                                initialValue: this.state.equipment.remark,
                                 rules: [{required: false, message: ''}],
                             })(
                                 <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"/>
@@ -311,8 +375,8 @@ class EmployeeAdd extends Component {
                         </FormItem>
                         <FormItem>
                             <Button type="primary" htmlType="submit" className="margin-right-16"
-                                    onClick={this.handleSubmit}>确认</Button>
-                            <Button type="default" onClick={this.props.onEmployeeAddCancelCallback}>取消</Button>
+                                    onClick={this.handleSubmit}>保存</Button>
+                            <Button type="default" onClick={this.props.onEquipmentEditCancelCallback}>取消</Button>
                         </FormItem>
                     </Form>
                 </Col>
@@ -321,4 +385,4 @@ class EmployeeAdd extends Component {
     }
 }
 
-export default createForm()(EmployeeAdd);
+export default createForm()(EquipmentEdit);

@@ -11,7 +11,7 @@ export const employeeStatus = {
     induction: '在职',
     dimission: '离职'
 };
-export const equipmentSatus = {
+export const equipmentStatus = {
     inuse: '使用中',
     unused: '未使用'
 };

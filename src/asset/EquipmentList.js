@@ -1,5 +1,5 @@
 /**
- * Created by biml on 2017/10/23.
+ * Created by biml on 2017/10/26.
  */
 import React, {Component} from "react";
 import {Layout, Button, Col, Form, Icon, Input, Pagination, Row, Table, Tooltip, Modal} from "antd";
@@ -7,13 +7,13 @@ import {createForm} from "rc-form";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {fail, success, utils, employeeStatus, ErrorNotifyTime} from "./Utils";
-import EmployeeShow from './EmployeeShow';
+import {fail, success, utils, equipmentStatus, ErrorNotifyTime} from "./Utils";
+import EquipmentShow from './EquipmentShow';
 
 /**
- * 员工列表组件
+ * 资产列表，含“搜索”、“领用”、“退还”、“删除”、“查看”
  */
-class EmployeeList extends Component {
+class EquipmentList extends Component{
     constructor(props) {
         super(props);
         this.state = {
@@ -25,7 +25,7 @@ class EmployeeList extends Component {
             officeAddresses: [],
             positions: [],
             searchText: '',
-            employees: {
+            equipments: {
                 list: [],
                 meta: {
                     total: 0,
@@ -35,22 +35,22 @@ class EmployeeList extends Component {
                     limit: 10
                 }
             },
-            // 要显示详情的员工
-            employeeToShow: null,
-            employeeIdToDimission: ''
+            // 要显示详情的资产
+            equipmentToShow: null,
+            equipmentIdToDimission: ''
         };
     }
 
     componentDidMount() {
-        this.handleQueryEmployeeList();
+        this.handleQueryEquipmentList();
     }
 
     /**
-     * 根据关键词查询员工列表
+     * 根据关键词查询资产列表
      * @param keyWord 关键词
      */
-    handleQueryEmployeeList = (keyWord) => {
-        const pageIndex = this.state.employees.meta.offset;
+    handleQueryEquipmentList = (keyWord) => {
+        const pageIndex = this.state.equipments.meta.offset;
         this.setState({
             loading: true,
             operationResult: {
@@ -58,7 +58,7 @@ class EmployeeList extends Component {
                 message: null
             }
         });
-        fetch(urlBase + `/employee/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${pageIndex}&limit=10`, {
+        fetch(urlBase + `/equipment/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${pageIndex}&limit=10`, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -81,7 +81,7 @@ class EmployeeList extends Component {
                         status: success,
                         message: '查询完成!'
                     },
-                    employees: {
+                    equipments: {
                         list: list,
                         meta: json.meta
                     }
@@ -134,17 +134,17 @@ class EmployeeList extends Component {
      * 搜索事件处理
      */
     handleSearch = () => {
-        this.handleQueryEmployeeList(this.state.searchText);
+        this.handleQueryEquipmentList(this.state.searchText);
     };
 
     /**
-     * 显示/关闭员工详情
-     * @param employee 员工,不为空时显示；为空时，隐藏。
+     * 显示/关闭资产详情
+     * @param equipment 资产,不为空时显示；为空时，隐藏。
      */
-    handleEmployeeDetail = (employee) => {
-        log("going to ", employee ? "show" : "close"," employee ", JSON.stringify(employee), " detail.");
+    handleEquipmentDetail = (equipment) => {
+        log("going to ", equipment ? "show" : "close"," equipment ", JSON.stringify(equipment), " detail.");
         this.setState({
-            employeeToShow: employee
+            equipmentToShow: equipment
         });
     };
 
@@ -152,31 +152,31 @@ class EmployeeList extends Component {
      * 关闭详情
      */
     handleModalClose = ()=>{
-        this.handleEmployeeDetail(null);
+        this.handleEquipmentDetail(null);
     };
 
     /**
-     * 员工离职
-     * @param employeeId 员工的ID
-     * @param employeeName 员工姓名
+     * 资产离职
+     * @param equipmentId 资产的ID
+     * @param equipmentName 资产姓名
      */
-    handleDimission = (employeeId, employeeName) => {
+    handleDimission = (equipmentId, equipmentName) => {
         Modal.confirm({
-            title: '员工离职',
-            content: `确定为员工【${employeeName}】办理离职?`,
-            onOk: (e)=>this.handleDoDimission(employeeId, e),
+            title: '资产离职',
+            content: `确定为资产【${equipmentName}】办理离职?`,
+            onOk: (e)=>this.handleDoDimission(equipmentId, e),
             onCancel() {},
         });
     };
 
     /**
      * 点击确定离职后的处理
-     * @param employeeId 员工ID
+     * @param equipmentId 资产ID
      * @param e Modal关闭函数
      */
-    handleDoDimission = (employeeId, e) => {
+    handleDoDimission = (equipmentId, e) => {
         e();//关闭对话框
-        fetch(`${urlBase}/employee/dimission/${employeeId}`,{
+        fetch(`${urlBase}/equipment/dimission/${equipmentId}`,{
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -228,7 +228,7 @@ class EmployeeList extends Component {
     };
 
     render() {
-        // 定义员工表格列
+        // 定义资产表格列
         const columns = [{
             title: '姓名',
             dataIndex: 'name',
@@ -239,7 +239,7 @@ class EmployeeList extends Component {
             key: 'code',
             render: (text, record) =>
                 <Tooltip overlay="查看详情" text>
-                    <span className="link-blue" onClick={(e)=>this.handleEmployeeDetail(record, e)}>{text}</span>
+                    <span className="link-blue" onClick={(e)=>this.handleEquipmentDetail(record, e)}>{text}</span>
                 </Tooltip>
         }, {
             title: '办公地址',
@@ -258,7 +258,7 @@ class EmployeeList extends Component {
             dataIndex: 'status',
             key: 'status',
             render:(text, record)=> {
-                return (<span>{employeeStatus[text]}</span>);
+                return (<span>{equipmentStatus[text]}</span>);
             }
         }, {
             title: '备注',
@@ -271,7 +271,7 @@ class EmployeeList extends Component {
                 <span>
                     <Tooltip overlay="编辑" text>
                         <Button type="default" icon="edit" style={{color:'green'}}
-                                onClick={(e)=>this.props.onEmployeeEditClick(text.id, e)}/>
+                                onClick={(e)=>this.props.onEquipmentEditClick(text.id, e)}/>
                     </Tooltip>
                     <span className="ant-divider"/>
                     <Tooltip overlay="离职" text>
@@ -282,15 +282,15 @@ class EmployeeList extends Component {
             ),
         }];
         // 表格数据
-        const data = this.state.employees.list;
-        const paginationTotal = this.state.employees.meta.total;
-        const paginationCurrent = this.state.employees.meta.offset;
+        const data = this.state.equipments.list;
+        const paginationTotal = this.state.equipments.meta.total;
+        const paginationCurrent = this.state.equipments.meta.offset;
         const searchText = this.state.searchText;
         return (
             <div>
                 <Row>
                     <Col className="centered">
-                        <h2 className="padding-top-bottom-16">员工列表</h2>
+                        <h2 className="padding-top-bottom-16">资产列表</h2>
                     </Col>
                     <Col>
                         <Input placeholder="输入姓名搜索" style={{width: 200}} value={searchText}
@@ -298,7 +298,7 @@ class EmployeeList extends Component {
                                suffix={<Button className="search-btn" type="primary" size="small" icon="search"
                                                onClick={this.handleSearch}/>}/>
                         <div className="ant-divider"/>
-                        <Button icon="plus" onClick={this.props.onEmployeeAddClickCallback}>添加员工</Button>
+                        <Button icon="plus" onClick={this.props.onEquipmentAddClickCallback}>添加资产</Button>
                     </Col>
                     <Col style={{marginTop: 8}}>
                         <Table columns={columns} dataSource={data} loading={this.state.loading}
@@ -307,14 +307,13 @@ class EmployeeList extends Component {
                     </Col>
                 </Row>
                 {
-                    this.state.employeeToShow &&
-                    <Modal title="员工详情" visible={true} onCancel={this.handleModalClose} closable footer={null}>
-                        {<EmployeeShow employee={this.state.employeeToShow} onClose={this.handleModalClose}/>}
+                    this.state.equipmentToShow &&
+                    <Modal title="资产详情" visible={true} onCancel={this.handleModalClose} closable footer={null}>
+                        {<EquipmentShow equipment={this.state.equipmentToShow} onClose={this.handleModalClose}/>}
                     </Modal>
                 }
             </div>
         );
     }
 }
-
-export default createForm()(EmployeeList);
+export default EquipmentList;
