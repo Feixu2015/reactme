@@ -266,17 +266,18 @@ class EmployeeList extends Component {
             key: 'remark',
         }, {
             title: '操作',
+            dataIndex: 'id',
             key: 'action',
-            render: (text, record) => (
+            render: (id, record) => (
                 <span>
                     <Tooltip overlay="编辑" text>
                         <Button type="default" icon="edit" style={{color:'green'}}
-                                onClick={(e)=>this.props.onEmployeeEditClick(text.id, e)}/>
+                                onClick={(e)=>this.props.onEmployeeEditClick(id, e)}/>
                     </Tooltip>
                     <span className="ant-divider"/>
                     <Tooltip overlay="离职" text>
                         <Button type="default" icon="user-delete" style={{color:'red'}}
-                                onClick={(e) => this.handleDimission(text.id, text.name, e)}/>
+                                onClick={(e) => this.handleDimission(id, record.name, e)}/>
                     </Tooltip>
                 </span>
             ),

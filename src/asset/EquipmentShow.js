@@ -2,13 +2,11 @@
  * Created by biml on 2017/10/23.
  */
 import React, {Component} from "react";
-import {Form, Row, Col, Table, Icon, Button, Input, Select, DatePicker, Alert, notification} from "antd";
-import {createForm} from "rc-form";
+import {Col, Row, Table} from "antd";
 import "./AssetApp.css";
 import "fetch-polyfill";
-import {log, urlBase} from "./Config";
-import {fail, success, utils, equipmentStatus} from "./Utils";
-import moment from 'moment';
+import {equipmentStatus} from "./Utils";
+import moment from "moment";
 
 /**
  * 资产详情组件,显示资产的信息和已领用的资产列表
