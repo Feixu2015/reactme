@@ -28,7 +28,7 @@ class EmployeeAdd extends Component {
 
     componentDidMount() {
         // get office Addresses
-        fetch(urlBase + "/dict/listByTypeCode?typeCode=574304b1-b726-11e7-828b-0a0027000009", {
+        fetch(urlBase + "/dict/listByTypeCode?typeCode=003", {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -85,7 +85,7 @@ class EmployeeAdd extends Component {
 
 
         // get position
-        fetch(urlBase + "/dict/listByTypeCode?typeCode=5742cc8f-b726-11e7-828b-0a0027000009", {
+        fetch(urlBase + "/dict/listByTypeCode?typeCode=001", {
             method: 'get',
             headers: {
                 'Accept': 'application/json',

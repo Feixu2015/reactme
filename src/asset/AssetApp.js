@@ -97,7 +97,7 @@ class AssetApp extends Component {
                 ) : (
                     <Layout>
                         <Sider style={{background: '#fff', width: 200}}>
-                            <Menu mode="vertical" defaultSelectedKeys={['equipment']}
+                            <Menu mode="inline" defaultSelectedKeys={['equipment']}
                                   defaultOpenKeys={['equipments','employees']} style={{height: '100%', borderRight: 0}}
                                   onClick={this.handleLeftMenuClick} inlineCollapsed={this.state.menuCollapsed}>
                                 <SubMenu key="equipments" title={<span><Icon type="switcher"/>资产管理</span>}>

@@ -21,15 +21,18 @@ class EquipmentEdit extends Component {
                 status: null,
                 message: null
             },
-            officeAddresses: [],
-            positions: [],
+            dict:{
+                brands: [],
+                types: [],
+                repertories: []
+            },
             equipment: {}
         };
     }
 
     componentDidMount() {
-        // get office Addresses
-        fetch(urlBase + "/dict/listByTypeCode?typeCode=574304b1-b726-11e7-828b-0a0027000009", {
+        // get brands
+        fetch(urlBase + "/dict/listByTypeCode?typeCode=006", {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -40,7 +43,7 @@ class EquipmentEdit extends Component {
             return response.json()
         }).then((json) => {
             log("json:", json);
-            let officeAddresses = [];
+            let brands = [];
             if (success === json.status) {
                 log("success:", json.message);
                 this.setState({
@@ -50,7 +53,7 @@ class EquipmentEdit extends Component {
                     }
                 });
                 json.list.forEach((value) => {
-                    officeAddresses.push(value.name)
+                    brands.push(value.name)
                 });
             } else if (fail === json.status) {
                 log("fail:", json);
@@ -70,7 +73,7 @@ class EquipmentEdit extends Component {
                 });
             }
             this.setState({
-                officeAddresses: officeAddresses
+                brands: brands
             });
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
@@ -84,9 +87,8 @@ class EquipmentEdit extends Component {
             utils.showNotification(this.state.operationResult);
         });
 
-
-        // get position
-        fetch(urlBase + "/dict/listByTypeCode?typeCode=5742cc8f-b726-11e7-828b-0a0027000009", {
+        // get types
+        fetch(urlBase + "/dict/listByTypeCode?typeCode=005", {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -97,8 +99,8 @@ class EquipmentEdit extends Component {
             return response.json()
         }).then((json) => {
             log("json:", json);
-            let positions = [];
-            if ("success" === json.status) {
+            let types = [];
+            if (success === json.status) {
                 log("success:", json.message);
                 this.setState({
                     operationResult: {
@@ -107,7 +109,7 @@ class EquipmentEdit extends Component {
                     }
                 });
                 json.list.forEach((value) => {
-                    positions.push(value.name)
+                    types.push(value.name)
                 });
             } else if (fail === json.status) {
                 log("fail:", json);
@@ -127,7 +129,63 @@ class EquipmentEdit extends Component {
                 });
             }
             this.setState({
-                positions: positions
+                types: types
+            });
+            utils.showNotification(this.state.operationResult);
+        }).catch((ex) => {
+            log("failed:", ex);
+            this.setState({
+                operationResult: {
+                    status: fail,
+                    message: ex.message
+                }
+            });
+            utils.showNotification(this.state.operationResult);
+        });
+
+        // get repertory
+        fetch(urlBase + "/dict/listByTypeCode?typeCode=002", {
+            method: 'get',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then((response) => {
+            log("response:", response);
+            return response.json()
+        }).then((json) => {
+            log("json:", json);
+            let repertories = [];
+            if (success === json.status) {
+                log("success:", json.message);
+                this.setState({
+                    operationResult: {
+                        status: null,
+                        message: null
+                    }
+                });
+                json.list.forEach((value) => {
+                    repertories.push(value.name)
+                });
+            } else if (fail === json.status) {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: json.message
+                    }
+                });
+            } else {
+                log("fail:", json);
+                this.setState({
+                    operationResult: {
+                        status: fail,
+                        message: `${json.status} ${json.message}`
+                    }
+                });
+            }
+            this.setState({
+                repertories: repertories
             });
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
