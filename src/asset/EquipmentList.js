@@ -184,7 +184,7 @@ class EquipmentList extends Component {
     handleDoDelete = (equipmentId, e) => {
         e();//关闭对话框
         fetch(`${urlBase}/equipment/${equipmentId}`, {
-            method: 'get',
+            method: 'delete',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
