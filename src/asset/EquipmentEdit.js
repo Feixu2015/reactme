@@ -437,7 +437,7 @@ class EquipmentEdit extends Component {
                         <FormItem>
                             <Button type="primary" htmlType="submit" className="margin-right-16"
                                     onClick={this.handleSubmit}>确认</Button>
-                            <Button type="default" onClick={this.props.onEquipmentAddCancelCallback}>取消</Button>
+                            <Button type="default" onClick={this.props.onEquipmentEditCancelCallback}>取消</Button>
                         </FormItem>
                     </Form>
                 </Col>

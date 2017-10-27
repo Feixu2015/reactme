@@ -195,14 +195,6 @@ class EmployeeEdit extends Component {
     }
 
     /**
-     * 选择办公地点事件处理
-     * @param e
-     */
-    handleOfficeAddressChange = (e) => {
-
-    };
-
-    /**
      * 表单提交处理
      * @param e
      */

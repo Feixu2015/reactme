@@ -13,7 +13,7 @@ import EquipmentShow from './EquipmentShow';
 /**
  * 资产列表，含“搜索”、“领用”、“退还”、“删除”、“查看”
  */
-class EquipmentList extends Component{
+class EquipmentList extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,15 +25,13 @@ class EquipmentList extends Component{
             officeAddresses: [],
             positions: [],
             searchText: '',
-            equipments: {
-                list: [],
-                meta: {
-                    total: 0,
-                    pages: 1,
-                    offset: 1,
-                    count: 0,
-                    limit: 10
-                }
+            equipments: [],
+            paginationMeta: {
+                total: 0,
+                pages: 1,
+                offset: 1,
+                count: 0,
+                limit: 10
             },
             // 要显示详情的资产
             equipmentToShow: null,
@@ -48,9 +46,12 @@ class EquipmentList extends Component{
     /**
      * 根据关键词查询资产列表
      * @param keyWord 关键词
+     * @param pageIndex 页码
+     * @param pageSize 每页大小
      */
-    handleQueryEquipmentList = (keyWord) => {
-        const pageIndex = this.state.equipments.meta.offset;
+    handleQueryEquipmentList = (keyWord, pageIndex, pageSize) => {
+        const index = pageIndex ? pageIndex : this.state.paginationMeta.offset;
+        const size = pageSize ? pageSize : this.state.paginationMeta.limit;
         this.setState({
             loading: true,
             operationResult: {
@@ -58,7 +59,8 @@ class EquipmentList extends Component{
                 message: null
             }
         });
-        fetch(urlBase + `/equipment/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${pageIndex}&limit=10`, {
+        fetch(`${urlBase}/equipment/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}`+
+            `&page=${index}&limit=${size}`, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -81,9 +83,13 @@ class EquipmentList extends Component{
                         status: success,
                         message: '查询完成!'
                     },
-                    equipments: {
-                        list: list,
-                        meta: json.meta
+                    equipments: list,
+                    paginationMeta: {
+                        total: json.meta.total,
+                        pages: json.meta.pages,
+                        offset: index,
+                        count: json.meta.count,
+                        limit: size
                     }
                 });
             } else if (fail === json.status) {
@@ -142,7 +148,7 @@ class EquipmentList extends Component{
      * @param equipment 资产,不为空时显示；为空时，隐藏。
      */
     handleEquipmentDetail = (equipment) => {
-        log("going to ", equipment ? "show" : "close"," equipment ", JSON.stringify(equipment), " detail.");
+        log("going to ", equipment ? "show" : "close", " equipment ", JSON.stringify(equipment), " detail.");
         this.setState({
             equipmentToShow: equipment
         });
@@ -151,7 +157,7 @@ class EquipmentList extends Component{
     /**
      * 关闭详情
      */
-    handleModalClose = ()=>{
+    handleModalClose = () => {
         this.handleEquipmentDetail(null);
     };
 
@@ -164,8 +170,9 @@ class EquipmentList extends Component{
         Modal.confirm({
             title: '删除资产',
             content: `确定为删除【${equipmentName}】这个资产?`,
-            onOk: (e)=>this.handleDoDimission(equipmentId, e),
-            onCancel() {},
+            onOk: (e) => this.handleDoDelete(equipmentId, e),
+            onCancel() {
+            },
         });
     };
 
@@ -174,9 +181,9 @@ class EquipmentList extends Component{
      * @param equipmentId 资产ID
      * @param e Modal关闭函数
      */
-    handleDoDimission = (equipmentId, e) => {
+    handleDoDelete = (equipmentId, e) => {
         e();//关闭对话框
-        fetch(`${urlBase}/equipment/dimission/${equipmentId}`,{
+        fetch(`${urlBase}/equipment/${equipmentId}`, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -243,6 +250,25 @@ class EquipmentList extends Component{
         log("receive equipment ", equipment.type);
     };
 
+    /**
+     * 翻页
+     * @param page 要跳转到的页
+     * @param pageSize 页大小
+     */
+    handleChangePage = (page, pageSize) => {
+        this.setState((preState, props) => ({
+            paginationMeta: {
+                total: preState.paginationMeta.total,
+                pages: preState.paginationMeta.pages,
+                offset: page,
+                count: preState.paginationMeta.count,
+                limit: pageSize
+            }
+        }));
+        log("pagination:", JSON.stringify(this.state.paginationMeta));
+        this.handleQueryEquipmentList(this.state.searchText, page, pageSize);
+    };
+
     render() {
         // 定义资产表格列
         const columns = [{
@@ -281,7 +307,7 @@ class EquipmentList extends Component{
             title: '资产状态',
             dataIndex: 'status',
             key: 'status',
-            render:(status, record)=><span>{equipmentStatus[status]}</span>
+            render: (status, record) => <span>{equipmentStatus[status]}</span>
         }, {
             title: '备注',
             dataIndex: 'remark',
@@ -290,17 +316,17 @@ class EquipmentList extends Component{
             title: '操作',
             dataIndex: 'id',
             key: 'action',
-            render:(id, record)=>(
+            render: (id, record) => (
                 <div>
                     <span>
                         <Tooltip overlay="编辑" text>
-                            <Button type="default" icon="edit" style={{color:'green'}}
-                                    onClick={(e)=>this.props.onEquipmentEditClick(id, e)}/>
+                            <Button type="default" icon="edit" style={{color: 'green'}}
+                                    onClick={(e) => this.props.onEquipmentEditClick(id, e)}/>
                         </Tooltip>
                         <span className="ant-divider"/>
                         <Tooltip overlay="删除" text>
-                            <Button type="default" icon="delete" style={{color:'red'}}
-                                    onClick={(e) => this.handleDelete(id, record.name, e)}/>
+                            <Button type="default" icon="delete" style={{color: 'red'}}
+                                    onClick={(e) => this.handleDelete(id, record.type, e)}/>
                         </Tooltip>
                         <span className="ant-divider"/>
                         {
@@ -323,9 +349,10 @@ class EquipmentList extends Component{
             )
         }];
         // 表格数据
-        const data = this.state.equipments.list;
-        const paginationTotal = this.state.equipments.meta.total;
-        const paginationCurrent = this.state.equipments.meta.offset;
+        const data = this.state.equipments;
+        const paginationTotal = this.state.paginationMeta.total;
+        const paginationCurrent = this.state.paginationMeta.offset;
+        const paginationSize = this.state.paginationMeta.limit;
         const searchText = this.state.searchText;
         return (
             <div>
@@ -343,8 +370,10 @@ class EquipmentList extends Component{
                     </Col>
                     <Col style={{marginTop: 8}}>
                         <Table columns={columns} dataSource={data} loading={this.state.loading}
-                               pagination={<Pagination defaultCurrent={1} current={paginationCurrent}
-                                                       total={paginationTotal}/>}/>
+                               pagination={false}/>
+                        <Pagination current={paginationCurrent}
+                                    total={paginationTotal} onChange={this.handleChangePage}
+                                    pageSize={paginationSize}/>
                     </Col>
                 </Row>
                 {

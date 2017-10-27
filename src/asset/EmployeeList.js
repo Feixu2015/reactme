@@ -25,15 +25,13 @@ class EmployeeList extends Component {
             officeAddresses: [],
             positions: [],
             searchText: '',
-            employees: {
-                list: [],
-                meta: {
-                    total: 0,
-                    pages: 1,
-                    offset: 1,
-                    count: 0,
-                    limit: 10
-                }
+            employees:[],
+            paginationMeta: {
+                total: 0,
+                pages: 1,
+                offset: 1,
+                count: 0,
+                limit: 10
             },
             // 要显示详情的员工
             employeeToShow: null,
@@ -48,9 +46,12 @@ class EmployeeList extends Component {
     /**
      * 根据关键词查询员工列表
      * @param keyWord 关键词
+     * @param pageIndex 页码
+     * @param pageSize 每页大小
      */
-    handleQueryEmployeeList = (keyWord) => {
-        const pageIndex = this.state.employees.meta.offset;
+    handleQueryEmployeeList = (keyWord, pageIndex, pageSize) => {
+        const index = pageIndex ? pageIndex : this.state.paginationMeta.offset;
+        const size = pageSize ? pageSize : this.state.paginationMeta.limit;
         this.setState({
             loading: true,
             operationResult: {
@@ -58,7 +59,7 @@ class EmployeeList extends Component {
                 message: null
             }
         });
-        fetch(urlBase + `/employee/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${pageIndex}&limit=10`, {
+        fetch(`${urlBase}/employee/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}&page=${index}&limit=${size}`, {
             method: 'get',
             headers: {
                 'Accept': 'application/json',
@@ -81,9 +82,13 @@ class EmployeeList extends Component {
                         status: success,
                         message: '查询完成!'
                     },
-                    employees: {
-                        list: list,
-                        meta: json.meta
+                    employees:list,
+                    paginationMeta: {
+                    total: json.meta.total,
+                        pages: json.meta.pages,
+                        offset: index,
+                        count: json.meta.count,
+                        limit: size
                     }
                 });
             } else if (fail === json.status) {
@@ -227,6 +232,25 @@ class EmployeeList extends Component {
         });
     };
 
+    /**
+     * 翻页
+     * @param page 要跳转到的页
+     * @param pageSize 页大小
+     */
+    handleChangePage = (page, pageSize) => {
+        this.setState((preState, props) => ({
+            paginationMeta: {
+                total: preState.paginationMeta.total,
+                pages: preState.paginationMeta.pages,
+                offset: page,
+                count: preState.paginationMeta.count,
+                limit: pageSize
+            }
+        }));
+        log("pagination:", JSON.stringify(this.state.paginationMeta));
+        this.handleQueryEquipmentList(this.state.searchText, page, pageSize);
+    };
+
     render() {
         // 定义员工表格列
         const columns = [{
@@ -269,23 +293,26 @@ class EmployeeList extends Component {
             dataIndex: 'id',
             key: 'action',
             render: (id, record) => (
-                <span>
+             'induction' === record.status ?
+                (<span>
                     <Tooltip overlay="编辑" text>
-                        <Button type="default" icon="edit" style={{color:'green'}}
-                                onClick={(e)=>this.props.onEmployeeEditClick(id, e)}/>
+                        <Button type="default" icon="edit" style={{color: 'green'}}
+                                onClick={(e) => this.props.onEmployeeEditClick(id, e)}/>
                     </Tooltip>
-                    <span className="ant-divider"/>
-                    <Tooltip overlay="离职" text>
+                    < span className="ant-divider"/>
+                        <Tooltip overlay="离职" text>
                         <Button type="default" icon="user-delete" style={{color:'red'}}
-                                onClick={(e) => this.handleDimission(id, record.name, e)}/>
+                        onClick={(e) => this.handleDimission(id, record.name, e)}/>
                     </Tooltip>
-                </span>
-            ),
+                </span>):
+                null
+            )
         }];
         // 表格数据
-        const data = this.state.employees.list;
-        const paginationTotal = this.state.employees.meta.total;
-        const paginationCurrent = this.state.employees.meta.offset;
+        const data = this.state.employees;
+        const paginationTotal = this.state.paginationMeta.total;
+        const paginationCurrent = this.state.paginationMeta.offset;
+        const paginationSize = this.state.paginationMeta.limit;
         const searchText = this.state.searchText;
         return (
             <div>
@@ -303,8 +330,10 @@ class EmployeeList extends Component {
                     </Col>
                     <Col style={{marginTop: 8}}>
                         <Table columns={columns} dataSource={data} loading={this.state.loading}
-                               pagination={<Pagination defaultCurrent={1} current={paginationCurrent}
-                                                       total={paginationTotal}/>}/>
+                               pagination={false}/>
+                        <Pagination current={paginationCurrent}
+                                    total={paginationTotal} onChange={this.handleChangePage}
+                                    pageSize={paginationSize}/>
                     </Col>
                 </Row>
                 {
