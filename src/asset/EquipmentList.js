@@ -156,14 +156,14 @@ class EquipmentList extends Component{
     };
 
     /**
-     * 资产离职
+     * 删除资产
      * @param equipmentId 资产的ID
-     * @param equipmentName 资产姓名
+     * @param equipmentName 资产名称
      */
-    handleDimission = (equipmentId, equipmentName) => {
+    handleDelete = (equipmentId, equipmentName) => {
         Modal.confirm({
-            title: '资产离职',
-            content: `确定为资产【${equipmentName}】办理离职?`,
+            title: '删除资产',
+            content: `确定为删除【${equipmentName}】这个资产?`,
             onOk: (e)=>this.handleDoDimission(equipmentId, e),
             onCancel() {},
         });
@@ -227,59 +227,100 @@ class EquipmentList extends Component{
         });
     };
 
+    /**
+     * 设备退还
+     * @param equipment 设备信息
+     */
+    handleReturn = (equipment) => {
+        log("return equipment ", equipment.type);
+    };
+
+    /**
+     * 设备领用
+     * @param equipment 设备信息
+     */
+    handleReceive = (equipment) => {
+        log("receive equipment ", equipment.type);
+    };
+
     render() {
         // 定义资产表格列
         const columns = [{
-            title: '姓名',
-            dataIndex: 'name',
-            key: 'name'
-        }, {
-            title: '工号',
+            title: '资产编号',
             dataIndex: 'code',
-            key: 'code',
-            render: (text, record) =>
-                <Tooltip overlay="查看详情" text>
-                    <span className="link-blue" onClick={(e)=>this.handleEquipmentDetail(record, e)}>{text}</span>
-                </Tooltip>
+            key: 'code'
         }, {
-            title: '办公地址',
-            dataIndex: 'officeAddress',
-            key: 'officeAddress',
+            title: '资产类型',
+            dataIndex: 'type',
+            key: 'type'
         }, {
-            title: '入职日期',
-            dataIndex: 'inductionDate',
-            key: 'inductionDate',
+            title: '资产品牌',
+            dataIndex: 'brand',
+            key: 'brand'
         }, {
-            title: '职位',
-            dataIndex: 'position',
-            key: 'position',
+            title: '资产型号',
+            dataIndex: 'model',
+            key: 'model'
         }, {
-            title: '状态',
+            title: '序列号',
+            dataIndex: 'serial',
+            key: 'serial'
+        }, {
+            title: '资产仓库',
+            dataIndex: 'repertory',
+            key: 'repertory'
+        }, {
+            title: '入库时间',
+            dataIndex: 'storageTime',
+            key: 'storageTime'
+        }, {
+            title: '拆封时间',
+            dataIndex: 'unpackingTime',
+            key: 'unpackingTime'
+        }, {
+            title: '资产状态',
             dataIndex: 'status',
             key: 'status',
-            render:(text, record)=> {
-                return (<span>{equipmentStatus[text]}</span>);
-            }
+            render:(status, record)=><span>{equipmentStatus[status]}</span>
         }, {
             title: '备注',
             dataIndex: 'remark',
-            key: 'remark',
+            key: 'remark'
         }, {
             title: '操作',
+            dataIndex: 'id',
             key: 'action',
-            render: (text, record) => (
-                <span>
-                    <Tooltip overlay="编辑" text>
-                        <Button type="default" icon="edit" style={{color:'green'}}
-                                onClick={(e)=>this.props.onEquipmentEditClick(text.id, e)}/>
-                    </Tooltip>
-                    <span className="ant-divider"/>
-                    <Tooltip overlay="离职" text>
-                        <Button type="default" icon="user-delete" style={{color:'red'}}
-                                onClick={(e) => this.handleDimission(text.id, text.name, e)}/>
-                    </Tooltip>
-                </span>
-            ),
+            render:(id, record)=>(
+                <div>
+                    <span>
+                        <Tooltip overlay="编辑" text>
+                            <Button type="default" icon="edit" style={{color:'green'}}
+                                    onClick={(e)=>this.props.onEquipmentEditClick(id, e)}/>
+                        </Tooltip>
+                        <span className="ant-divider"/>
+                        <Tooltip overlay="删除" text>
+                            <Button type="default" icon="delete" style={{color:'red'}}
+                                    onClick={(e) => this.handleDelete(id, record.name, e)}/>
+                        </Tooltip>
+                        <span className="ant-divider"/>
+                        {
+                            "inuse" === record.state ?
+                                (
+                                    <Tooltip overlay="退回" text>
+                                        <Button type="default" icon="select" style={{color: 'orange'}}
+                                                onClick={(e) => this.handleReturn(record, e)}/>
+                                    </Tooltip>
+                                ) :
+                                (
+                                    <Tooltip overlay="领用" text>
+                                        <Button type="default" icon="export" style={{color: 'blue'}}
+                                                onClick={(e) => this.handleReceive(record, e)}/>
+                                    </Tooltip>
+                                )
+                        }
+                    </span>
+                </div>
+            )
         }];
         // 表格数据
         const data = this.state.equipments.list;
@@ -293,7 +334,7 @@ class EquipmentList extends Component{
                         <h2 className="padding-top-bottom-16">资产列表</h2>
                     </Col>
                     <Col>
-                        <Input placeholder="输入姓名搜索" style={{width: 200}} value={searchText}
+                        <Input placeholder="输入编号搜索" style={{width: 200}} value={searchText}
                                onChange={this.handleSearchTextChange}
                                suffix={<Button className="search-btn" type="primary" size="small" icon="search"
                                                onClick={this.handleSearch}/>}/>

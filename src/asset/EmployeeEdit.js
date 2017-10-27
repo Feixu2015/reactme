@@ -84,7 +84,6 @@ class EmployeeEdit extends Component {
             utils.showNotification(this.state.operationResult);
         });
 
-
         // get position
         fetch(urlBase + "/dict/listByTypeCode?typeCode=001", {
             method: 'get',
@@ -201,15 +200,6 @@ class EmployeeEdit extends Component {
      */
     handleOfficeAddressChange = (e) => {
 
-    };
-
-    /**
-     * 选择入职时间处理
-     * @param e
-     */
-    handleInductionDateChange = (e) => {
-        const date = e.format('YYYY-MM-DD')
-        log("inductionDate:", date);
     };
 
     /**
@@ -351,8 +341,7 @@ class EmployeeEdit extends Component {
                                 rules: [{required: true, message: '请选择入职日期!'}],
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
-                                            onChange={this.handleInductionDateChange} format="YYYY-MM-DD"
-                                            placeholder="入职日期"/>
+                                            format="YYYY-MM-DD" placeholder="入职日期"/>
                             )}
                         </FormItem>
                         <FormItem label="员工职位">

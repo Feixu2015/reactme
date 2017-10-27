@@ -2,13 +2,13 @@
  * Created by biml on 2017/10/26.
  */
 import React, {Component} from "react";
-import {Form, Row, Col, Icon, Button, Input, Select, DatePicker, Alert, notification} from "antd";
+import {Button, Col, DatePicker, Form, Icon, Input, Row, Select} from "antd";
 import {createForm} from "rc-form";
-import moment from 'moment';
+import moment from "moment";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {utils, success, fail} from './Utils';
+import {fail, success, utils} from "./Utils";
 
 /**
  * 添加资产组件
@@ -21,11 +21,9 @@ class EquipmentAdd extends Component {
                 status: null,
                 message: null
             },
-            dict:{
-                brands: [],
-                types: [],
-                repertories: []
-            }
+            brands: [],
+            types: [],
+            repertories: []
         };
     }
 
@@ -71,11 +69,9 @@ class EquipmentAdd extends Component {
                     }
                 });
             }
-            this.setState({
-                dict:{
-                    brands: brands
-                }
-            });
+            this.setState((prevState, props) => ({
+                brands: brands
+            }));
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
             log("fail:", ex);
@@ -129,11 +125,9 @@ class EquipmentAdd extends Component {
                     }
                 });
             }
-            this.setState({
-                dict:{
-                    types: types
-                }
-            });
+            this.setState((prevState, props) => ({
+                types: types
+            }));
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
             log("failed:", ex);
@@ -146,7 +140,7 @@ class EquipmentAdd extends Component {
             utils.showNotification(this.state.operationResult);
         });
 
-        // get repertory
+        // get repertories
         fetch(urlBase + "/dict/listByTypeCode?typeCode=002", {
             method: 'get',
             headers: {
@@ -187,11 +181,9 @@ class EquipmentAdd extends Component {
                     }
                 });
             }
-            this.setState({
-                dict:{
-                    repertories: repertories
-                }
-            });
+            this.setState((prevState, props) => ({
+                repertories: repertories
+            }));
             utils.showNotification(this.state.operationResult);
         }).catch((ex) => {
             log("failed:", ex);
@@ -241,7 +233,7 @@ class EquipmentAdd extends Component {
                         this.setState({
                             operationResult: {
                                 status: success,
-                                message: "添加资产成功！"
+                                message: values.userName
                             }
                         });
                         setTimeout(() => {
@@ -296,111 +288,101 @@ class EquipmentAdd extends Component {
         const Option = Select.Option;
         const {TextArea} = Input;
         const {getFieldDecorator} = this.props.form;
-        let content = <div/>;
-        if(undefined == this.state.dict.repertories && undefined == this.state.dict.repertories
-            && undefined == this.state.dict.repertories) {
-            //仓库
-            const repertories = this.state.dict.repertories.map((value) =>
-                <Option value={value} key={value}>{value}</Option>);
-            //品牌
-            const brands = this.state.dict.brands.map((value) =>
-                <Option value={value} key={value}>{value}</Option>);
-            //类型
-            const types = this.state.dict.types.map((value) =>
-                <Option value={value} key={value}>{value}</Option>);
-            content = (
-                <Row loading={true}>
-                    <Col className="centered">
-                        <h2 className="padding-top-bottom-16">添 加 资 产</h2>
-                    </Col>
-                    <Col span={8} offset={8}>
-                        <Form onSubmit={this.handleSubmit} className="login-form">
-                            <FormItem label="资产编号">
-                                {getFieldDecorator('code', {
-                                    rules: [{required: true, message: '请输编号!'}],
-                                })(
-                                    <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="资产编号"/>
-                                )}
-                            </FormItem>
-                            <FormItem label="资产类型">
-                                {getFieldDecorator('type', {
-                                    rules: [{required: true, message: '请输入资产类型!'}],
-                                })(
-                                    <Select style={{width: '100%'}} placeholder="请选择资产类型">
-                                        {types}
-                                    </Select>
-                                )}
-                            </FormItem>
-                            <FormItem label="资产品牌">
-                                {getFieldDecorator('brand', {
-                                    rules: [{required: true, message: '请输入资产品牌!'}],
-                                })(
-                                    <Select style={{width: '100%'}} placeholder="请选择资产品牌">
-                                        {brands}
-                                    </Select>
-                                )}
-                            </FormItem>
-                            <FormItem label="资产型号">
-                                {getFieldDecorator('model', {
-                                    rules: [{required: true, message: '请输入资产型号!'}],
-                                })(
-                                    <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="资产型号"/>
-                                )}
-                            </FormItem>
-                            <FormItem label="序列号">
-                                {getFieldDecorator('serial', {
-                                    rules: [{required: true, message: '请选输入序列号!'}],
-                                })(
-                                    <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="序列号"/>
-                                )}
-                            </FormItem>
-                            <FormItem label="资产仓库">
-                                {getFieldDecorator('repertory', {
-                                    rules: [{required: true, message: '请选择资产仓库!'}],
-                                })(
-                                    <Select style={{width: '100%'}} placeholder="请选择资产仓库">
-                                        {repertories}
-                                    </Select>
-                                )}
-                            </FormItem>
-                            <FormItem label="入库时间">
-                                {getFieldDecorator('storageTime', {
-                                    initialValue: moment(),
-                                    rules: [{required: true, message: '请选择入库时间!'}],
-                                })(
-                                    <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>}
-                                                style={{width: '100%'}}
-                                                format="YYYY-MM-DD" placeholder="入库时间"/>
-                                )}
-                            </FormItem>
-                            <FormItem label="拆封时间">
-                                {getFieldDecorator('unpackingTime', {
-                                    initialValue: moment(),
-                                    rules: [{required: true, message: '请选择拆封时间!'}],
-                                })(
-                                    <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>}
-                                                style={{width: '100%'}}
-                                                format="YYYY-MM-DD" placeholder="拆封时间"/>
-                                )}
-                            </FormItem>
-                            <FormItem label="备注">
-                                {getFieldDecorator('remark', {
-                                    rules: [{required: false, message: ''}],
-                                })(
-                                    <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"/>
-                                )}
-                            </FormItem>
-                            <FormItem>
-                                <Button type="primary" htmlType="submit" className="margin-right-16"
-                                        onClick={this.handleSubmit}>确认</Button>
-                                <Button type="default" onClick={this.props.onEquipmentAddCancelCallback}>取消</Button>
-                            </FormItem>
-                        </Form>
-                    </Col>
-                </Row>
-            );
-        }
-        return content;
+        const brands = this.state.brands.map((value) =>
+            <Option value={value} key={value}>{value}</Option>);
+        const types = this.state.types.map((value) =>
+            <Option value={value} key={value}>{value}</Option>);
+        const repertories = this.state.repertories.map((value) =>
+            <Option value={value} key={value}>{value}</Option>);
+        return (
+            <Row>
+                <Col className="centered">
+                    <h2 className="padding-top-bottom-16">新 增 资 产</h2>
+                </Col>
+                <Col span={6} offset={9}>
+                    <Form onSubmit={this.handleSubmit} className="login-form">
+                        <FormItem label="资产编号">
+                            {getFieldDecorator('code', {
+                                rules: [{required: true, message: '请输入资产编号!'}],
+                            })(
+                                <Input placeholder="资产编号"/>
+                            )}
+                        </FormItem>
+                        <FormItem label="仓库地址">
+                            {getFieldDecorator('repertory', {
+                                rules: [{required: true, message: '请选择仓库地址!'}],
+                            })(
+                                <Select style={{width: '100%'}} placeholder="请选择仓库地址">
+                                    {repertories}
+                                </Select>
+                            )}
+                        </FormItem>
+                        <FormItem label="资产类型">
+                            {getFieldDecorator('type', {
+                                rules: [{required: true, message: '请输资产类型!'}],
+                            })(
+                                <Select style={{width: '100%'}} placeholder="请选择资产类型">
+                                    {types}
+                                </Select>
+                            )}
+                        </FormItem>
+                        <FormItem label="资产品牌">
+                            {getFieldDecorator('brand', {
+                                rules: [{required: true, message: '请选择资产品牌!'}],
+                            })(
+                                <Select style={{width: '100%'}} placeholder="请选择资产品牌">
+                                    {brands}
+                                </Select>
+                            )}
+                        </FormItem>
+                        <FormItem label="资产型号">
+                            {getFieldDecorator('model', {
+                                rules: [{required: true, message: '请输入资产型号!'}],
+                            })(
+                                <Input placeholder="资产型号"/>
+                            )}
+                        </FormItem>
+                        <FormItem label="序列号">
+                            {getFieldDecorator('serial', {
+                                rules: [{required: true, message: '请输入序列号!'}],
+                            })(
+                                <Input placeholder="序列号"/>
+                            )}
+                        </FormItem>
+                        <FormItem label="入库日期">
+                            {getFieldDecorator('storageTime', {
+                                initialValue: moment(),
+                                rules: [{required: true, message: '请选择入库日期!'}],
+                            })(
+                                <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
+                                            format="YYYY-MM-DD" placeholder="入库日期"/>
+                            )}
+                        </FormItem>
+                        <FormItem label="拆封日期">
+                            {getFieldDecorator('unpackingTime', {
+                                initialValue: moment(),
+                                rules: [{required: true, message: '请选择拆封日期!'}],
+                            })(
+                                <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
+                                            format="YYYY-MM-DD" placeholder="拆封日期"/>
+                            )}
+                        </FormItem>
+                        <FormItem label="备注">
+                            {getFieldDecorator('remark', {
+                                rules: [{required: false, message: ''}],
+                            })(
+                                <TextArea rows={3} maxLength="200" type={{width: '100%'}} placeholder="备注"/>
+                            )}
+                        </FormItem>
+                        <FormItem>
+                            <Button type="primary" htmlType="submit" className="margin-right-16"
+                                    onClick={this.handleSubmit}>确认</Button>
+                            <Button type="default" onClick={this.props.onEquipmentAddCancelCallback}>取消</Button>
+                        </FormItem>
+                    </Form>
+                </Col>
+            </Row>
+        );
     }
 }
 

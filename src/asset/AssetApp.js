@@ -96,7 +96,7 @@ class AssetApp extends Component {
                     <Login onLoginCallback={this.handleLoginCallback}/>
                 ) : (
                     <Layout>
-                        <Sider style={{background: '#fff', width: 200}}>
+                        <Sider style={{background: '#fff', width: '20%'}}>
                             <Menu mode="inline" defaultSelectedKeys={['equipment']}
                                   defaultOpenKeys={['equipments','employees']} style={{height: '100%', borderRight: 0}}
                                   onClick={this.handleLeftMenuClick} inlineCollapsed={this.state.menuCollapsed}>

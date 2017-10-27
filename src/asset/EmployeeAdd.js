@@ -83,7 +83,6 @@ class EmployeeAdd extends Component {
             utils.showNotification(this.state.operationResult);
         });
 
-
         // get position
         fetch(urlBase + "/dict/listByTypeCode?typeCode=001", {
             method: 'get',
@@ -140,15 +139,6 @@ class EmployeeAdd extends Component {
             utils.showNotification(this.state.operationResult);
         });
     }
-
-    /**
-     * 选择入职时间处理
-     * @param e
-     */
-    handleInductionDateChange = (e) => {
-        const date = e.format('YYYY-MM-DD')
-        log("inductionDate:", date);
-    };
 
     /**
      * 表单提交处理
@@ -269,7 +259,7 @@ class EmployeeAdd extends Component {
                             {getFieldDecorator('code', {
                                 rules: [{required: true, message: '请输员工工号!'}],
                             })(
-                                <Input suffix={<Icon type="info" style={{fontSize: 13}}/>} placeholder="员工工号"/>
+                                <Input placeholder="员工工号"/>
                             )}
                         </FormItem>
                         <FormItem label="办公地址">
@@ -288,8 +278,7 @@ class EmployeeAdd extends Component {
                                 rules: [{required: true, message: '请选择入职日期!'}],
                             })(
                                 <DatePicker prefix={<Icon type="user" style={{fontSize: 13}}/>} style={{width: '100%'}}
-                                            onChange={this.handleInductionDateChange} format="YYYY-MM-DD"
-                                            placeholder="入职日期"/>
+                                            format="YYYY-MM-DD" placeholder="入职日期"/>
                             )}
                         </FormItem>
                         <FormItem label="员工职位">
