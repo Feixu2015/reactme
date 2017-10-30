@@ -20,7 +20,7 @@ class AssetApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            page: 'equipment',
+            page: 'login',
             userName: 'mock'
         }
     }
