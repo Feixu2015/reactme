@@ -7,13 +7,29 @@ import {Icon, notification} from 'antd';
 
 export const success = "success";
 export const fail = "fail";
-export const employeeStatus = {
+/**
+ * 员工状态
+ * @type {{induction: string, dimission: string}}
+ */
+export const EMPLOYEE_STATUS = {
     induction: '在职',
     dimission: '离职'
 };
-export const equipmentStatus = {
+/**
+ * 设备状态
+ * @type {{inuse: string, unused: string}}
+ */
+export const EQUIPMENT_STATUS = {
     inuse: '使用中',
     unused: '未使用'
+};
+/**
+ * 资产操作
+ * @type {{receive: string, return: string}}
+ */
+export const EQUIPMENT_OPERATIONS = {
+    receive: '领用',
+    return: '退还'
 };
 /**
  * 发生错误时提示信息停留时间，单位秒

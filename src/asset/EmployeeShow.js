@@ -7,7 +7,7 @@ import {createForm} from "rc-form";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {fail, success, utils, employeeStatus} from "./Utils";
+import {fail, success, utils, EMPLOYEE_STATUS} from "./Utils";
 import moment from 'moment';
 
 /**
@@ -58,7 +58,7 @@ class EmployeeShow extends Component {
                             入职时间：
                         </Col>
                         <Col span={4}>
-                            <span>{moment(this.props.employee.inductionDate, "YYYY-MM-DD").format("YYYY-MM-DD")}</span>
+                            <span>{this.props.employee.inductionDate.substr(0,10)}</span>
                         </Col>
                     </Row>
                     <Row>
@@ -72,7 +72,7 @@ class EmployeeShow extends Component {
                             员工状态：
                         </Col>
                         <Col span={4}>
-                            <span>{employeeStatus[this.props.employee.status]}</span>
+                            <span>{EMPLOYEE_STATUS[this.props.employee.status]}</span>
                         </Col>
                     </Row>
                     <Row>

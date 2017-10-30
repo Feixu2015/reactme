@@ -7,7 +7,7 @@ import {createForm} from "rc-form";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {fail, success, utils, employeeStatus, ErrorNotifyTime} from "./Utils";
+import {fail, success, utils, EMPLOYEE_STATUS, ErrorNotifyTime} from "./Utils";
 import EmployeeShow from './EmployeeShow';
 
 /**
@@ -282,7 +282,7 @@ class EmployeeList extends Component {
             dataIndex: 'status',
             key: 'status',
             render:(text, record)=> {
-                return (<span>{employeeStatus[text]}</span>);
+                return (<span>{EMPLOYEE_STATUS[text]}</span>);
             }
         }, {
             title: '备注',
@@ -321,7 +321,7 @@ class EmployeeList extends Component {
                         <h2 className="padding-top-bottom-16">员工列表</h2>
                     </Col>
                     <Col>
-                        <Input placeholder="输入姓名搜索" style={{width: 200}} value={searchText}
+                        <Input placeholder="输入姓名/工号搜索" style={{width: 200}} value={searchText}
                                onChange={this.handleSearchTextChange}
                                suffix={<Button className="search-btn" type="primary" size="small" icon="search"
                                                onClick={this.handleSearch}/>}/>

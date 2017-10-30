@@ -7,7 +7,7 @@ import {createForm} from "rc-form";
 import "./AssetApp.css";
 import "fetch-polyfill";
 import {log, urlBase} from "./Config";
-import {fail, success, utils, equipmentStatus, ErrorNotifyTime} from "./Utils";
+import {fail, success, utils, EQUIPMENT_STATUS, ErrorNotifyTime, EQUIPMENT_OPERATIONS} from "./Utils";
 import EquipmentShow from './EquipmentShow';
 
 /**
@@ -35,7 +35,7 @@ class EquipmentList extends Component {
             },
             // 要显示详情的资产
             equipmentToShow: null,
-            equipmentIdToDimission: ''
+            equipmentOperation: null
         };
     }
 
@@ -50,6 +50,7 @@ class EquipmentList extends Component {
      * @param pageSize 每页大小
      */
     handleQueryEquipmentList = (keyWord, pageIndex, pageSize) => {
+        const key = utils.isStrEmpty(keyWord) ? "" : keyWord;
         const index = pageIndex ? pageIndex : this.state.paginationMeta.offset;
         const size = pageSize ? pageSize : this.state.paginationMeta.limit;
         this.setState({
@@ -59,7 +60,7 @@ class EquipmentList extends Component {
                 message: null
             }
         });
-        fetch(`${urlBase}/equipment/findByPage?keyword=${ utils.isStrEmpty(keyWord) ? "" : keyWord}`+
+        fetch(`${urlBase}/equipment/findByPage?keyword=${key}`+
             `&page=${index}&limit=${size}`, {
             method: 'get',
             headers: {
@@ -140,11 +141,11 @@ class EquipmentList extends Component {
      * 搜索事件处理
      */
     handleSearch = () => {
-        this.handleQueryEquipmentList(this.state.searchText);
+        this.handleQueryEquipmentList();
     };
 
     /**
-     * 显示/关闭资产详情
+     * 显示/关闭资产领用退还
      * @param equipment 资产,不为空时显示；为空时，隐藏。
      */
     handleEquipmentDetail = (equipment) => {
@@ -155,10 +156,18 @@ class EquipmentList extends Component {
     };
 
     /**
-     * 关闭详情
+     * 关闭领用退还
      */
     handleModalClose = () => {
         this.handleEquipmentDetail(null);
+    };
+
+    /**
+     * 关闭资产领用、退还，并刷新数据
+     */
+    handleEquipmentOperationCallback = () => {
+        this.handleEquipmentDetail(null);
+        this.handleQueryEquipmentList();
     };
 
     /**
@@ -240,6 +249,10 @@ class EquipmentList extends Component {
      */
     handleReturn = (equipment) => {
         log("return equipment ", equipment.type);
+        this.setState({
+            equipmentOperation: 'return',
+            equipmentToShow: equipment
+        });
     };
 
     /**
@@ -248,6 +261,10 @@ class EquipmentList extends Component {
      */
     handleReceive = (equipment) => {
         log("receive equipment ", equipment.type);
+        this.setState({
+            equipmentOperation: 'receive',
+            equipmentToShow: equipment
+        });
     };
 
     /**
@@ -307,7 +324,7 @@ class EquipmentList extends Component {
             title: '资产状态',
             dataIndex: 'status',
             key: 'status',
-            render: (status, record) => <span>{equipmentStatus[status]}</span>
+            render: (status, record) => <span>{EQUIPMENT_STATUS[status]}<div className={'inuse' === status ? "status-inuse":"status-unused"}/></span>
         }, {
             title: '备注',
             dataIndex: 'remark',
@@ -325,21 +342,21 @@ class EquipmentList extends Component {
                         </Tooltip>
                         <span className="ant-divider"/>
                         <Tooltip overlay="删除" text>
-                            <Button type="default" icon="delete" style={{color: 'red'}}
+                            <Button type="default" icon="delete" style={{color: 'orange'}}
                                     onClick={(e) => this.handleDelete(id, record.type, e)}/>
                         </Tooltip>
                         <span className="ant-divider"/>
                         {
-                            "inuse" === record.state ?
+                            "inuse" === record.status ?
                                 (
-                                    <Tooltip overlay="退回" text>
-                                        <Button type="default" icon="select" style={{color: 'orange'}}
+                                    <Tooltip overlay="退还" text>
+                                        <Button type="default" icon="login" style={{color: 'red'}}
                                                 onClick={(e) => this.handleReturn(record, e)}/>
                                     </Tooltip>
                                 ) :
                                 (
                                     <Tooltip overlay="领用" text>
-                                        <Button type="default" icon="export" style={{color: 'blue'}}
+                                        <Button type="default" icon="logout" style={{color: 'blue'}}
                                                 onClick={(e) => this.handleReceive(record, e)}/>
                                     </Tooltip>
                                 )
@@ -348,12 +365,22 @@ class EquipmentList extends Component {
                 </div>
             )
         }];
+        // 表格行样式
+        const rowClassName = (record, index) => {
+            if(record.status === 'inuse'){
+                return 'table-row-grid'
+            }else{
+                return ''
+            }
+        };
         // 表格数据
         const data = this.state.equipments;
         const paginationTotal = this.state.paginationMeta.total;
         const paginationCurrent = this.state.paginationMeta.offset;
         const paginationSize = this.state.paginationMeta.limit;
         const searchText = this.state.searchText;
+        const equipmentToShow = this.state.equipmentToShow;
+        const equipmentOperation = this.state.equipmentOperation;
         return (
             <div>
                 <Row>
@@ -370,16 +397,19 @@ class EquipmentList extends Component {
                     </Col>
                     <Col style={{marginTop: 8}}>
                         <Table columns={columns} dataSource={data} loading={this.state.loading}
-                               pagination={false}/>
+                               rowClassName={rowClassName} pagination={false}/>
                         <Pagination current={paginationCurrent}
                                     total={paginationTotal} onChange={this.handleChangePage}
                                     pageSize={paginationSize}/>
                     </Col>
                 </Row>
                 {
-                    this.state.equipmentToShow &&
-                    <Modal title="资产详情" visible={true} onCancel={this.handleModalClose} closable footer={null}>
-                        {<EquipmentShow equipment={this.state.equipmentToShow} onClose={this.handleModalClose}/>}
+                    equipmentToShow &&
+                    <Modal title={<span className="centered">{`资产${EQUIPMENT_OPERATIONS[equipmentOperation]}`}</span>}
+                           visible={true} onCancel={this.handleModalClose} closable footer={null}>
+                        {<EquipmentShow equipment={equipmentToShow} operation={equipmentOperation}
+                                        onEquipmentOperationCallback={this.handleEquipmentOperationCallback}
+                                        onClose={this.handleModalClose}/>}
                     </Modal>
                 }
             </div>

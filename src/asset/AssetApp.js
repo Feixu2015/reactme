@@ -120,7 +120,7 @@ class AssetApp extends Component {
                         </Layout>
                     </Layout>
                 )}
-                <Footer className="centered">
+                <Footer className="centered" style={{padding:'10px 0px'}}>
                     IDCOS AMS @ 2017. All right reserved.
                 </Footer>
             </Layout>
