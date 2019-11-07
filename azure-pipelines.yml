@@ -28,5 +28,9 @@ steps:
       pwd
       echo 'ifconfig'
       ifconfig
-      echo 'ping'
-      ping -c 5 www.baidu.com
+      #echo 'ping'
+      #ping -c 5 www.baidu.com
+      echo 'uname -a'
+      uanme -a
+      echo 'who am i'
+      whoami
