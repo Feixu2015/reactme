@@ -28,3 +28,5 @@ steps:
       pwd
       echo 'ifconfig'
       ifconfig
+      echo 'ping'
+      ping -c 5 www.baidu.com
