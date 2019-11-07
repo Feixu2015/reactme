@@ -18,13 +18,13 @@ steps:
 - script: |
     npm install
     npm run build
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          # Write your commands here
-          echo 'pwd'
-          pwd
-          echo 'ifconfig'
-          ifconfig
   displayName: 'npm install and build'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your commands here
+      echo 'pwd'
+      pwd
+      echo 'ifconfig'
+      ifconfig
