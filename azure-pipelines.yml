@@ -23,6 +23,8 @@ steps:
         targetType: 'inline'
         script: |
           # Write your commands here
+          echo 'pwd'
           pwd
+          echo 'ifconfig'
           ifconfig
   displayName: 'npm install and build'
